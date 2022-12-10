@@ -44,6 +44,14 @@ namespace SketcherControl.Shapes
             {
                 vertex.SetRenderSize(scale, offsetX, ofssetY, angleX, angleY);
             }
+
+            foreach (var edge in Edges)
+            {
+                edge.UpdateSlope();
+            }
+
+            CoefficientsCache.Clear();
+            NormalVectorsCache.Clear();
         }
 
         public void Render(DirectBitmap canvas)

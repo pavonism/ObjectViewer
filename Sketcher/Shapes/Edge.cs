@@ -19,9 +19,7 @@ namespace SketcherControl.Shapes
             From = from;
             To = to;
 
-            var lowerVertex = From.Location.Y < To.Location.Y ? From : To;
-            var higherVertex = From != lowerVertex ? From : To;
-            Slope = (higherVertex.Location.X - lowerVertex.Location.X) / (higherVertex.Location.Y - lowerVertex.Location.Y);
+            UpdateSlope();
         }
 
         public void Render(DirectBitmap bitmap)
@@ -30,6 +28,13 @@ namespace SketcherControl.Shapes
             {
                 g.DrawLine(Pens.Black, From.RenderLocation.X, bitmap.Height - From.RenderLocation.Y, To.RenderLocation.X, bitmap.Height - To.RenderLocation.Y);
             }
+        }
+
+        public void UpdateSlope()
+        {
+            var lowerVertex = From.Location.Y < To.Location.Y ? From : To;
+            var higherVertex = From != lowerVertex ? From : To;
+            Slope = (higherVertex.RenderLocation.X - lowerVertex.RenderLocation.X) / (higherVertex.RenderLocation.Y - lowerVertex.RenderLocation.Y);
         }
     }
 }
