@@ -10,7 +10,7 @@ namespace SketcherControl.Filling
 
             foreach (var edge in polygon.Edges)
             {
-                edge.DrawingX = edge.From.RenderY == edge.YMin ? edge.From.RenderX : edge.To.RenderX;
+                edge.DrawingX = edge.From.RenderLocation.Y == edge.YMin ? edge.From.RenderLocation.X : edge.To.RenderLocation.X;
                 var index = (int)edge.YMin - minY;
 
                 if (sortedEdges[index] == null)

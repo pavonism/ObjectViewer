@@ -21,10 +21,10 @@ namespace SketcherControl.Shapes
 
             foreach (var vertex in Vertices)
             {
-                maxPoint.X = Math.Max(maxPoint.X, vertex.RenderX);
-                maxPoint.Y = Math.Max(maxPoint.Y, vertex.RenderY);
-                minPoint.X = Math.Min(minPoint.X, vertex.RenderX);
-                minPoint.Y = Math.Min(minPoint.Y, vertex.RenderY);
+                maxPoint.X = Math.Max(maxPoint.X, vertex.RenderLocation.X);
+                maxPoint.Y = Math.Max(maxPoint.Y, vertex.RenderLocation.Y);
+                minPoint.X = Math.Min(minPoint.X, vertex.RenderLocation.X);
+                minPoint.Y = Math.Min(minPoint.Y, vertex.RenderLocation.Y);
             }
 
             max = new Point((int)Math.Ceiling(maxPoint.X), (int)Math.Ceiling(maxPoint.Y));

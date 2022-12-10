@@ -157,8 +157,8 @@ namespace SketcherControl.Filling
                 case Interpolation.Color:
                     foreach (var vertex in vertices)
                     {
-                        var textureColor = Pattern?.GetPixel(((int)vertex.RenderX + Pattern.Width / 2) % Pattern.Width, ((int)vertex.RenderY + Pattern.Height / 2) % Pattern.Height).ToVector();
-                        var normalVector = NormalMap != null ? GetNormalVectorFromNormalMap((int)vertex.RenderX, (int)vertex.RenderY, vertex.NormalVector) : vertex.NormalVector;
+                        var textureColor = Pattern?.GetPixel(((int)vertex.RenderLocation.X + Pattern.Width / 2) % Pattern.Width, ((int)vertex.RenderLocation.Y + Pattern.Height / 2) % Pattern.Height).ToVector();
+                        var normalVector = NormalMap != null ? GetNormalVectorFromNormalMap((int)vertex.RenderLocation.X, (int)vertex.RenderLocation.Y, vertex.NormalVector) : vertex.NormalVector;
                         vertex.Color = CalculateColorInPoint(vertex.Location, normalVector, textureColor);
                     }
                     break;
@@ -304,10 +304,10 @@ namespace SketcherControl.Filling
 
             for (int i = 0; i < polygon.Vertices.Length; i++)
             {
-                var xBA = polygon.Vertices[i].RenderX - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderX;
-                var yCA = pixelLocation.Y - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderY;
-                var yBA = polygon.Vertices[i].RenderY - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderY;
-                var xCA = pixelLocation.X - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderX;
+                var xBA = polygon.Vertices[i].RenderLocation.X - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.X;
+                var yCA = pixelLocation.Y - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.Y;
+                var yBA = polygon.Vertices[i].RenderLocation.Y - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.Y;
+                var xCA = pixelLocation.X - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.X;
                 var area = 0.5f * Math.Abs(xBA * yCA - yBA * xCA);
 
                 sum += area;

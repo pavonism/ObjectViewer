@@ -38,11 +38,11 @@ namespace SketcherControl.Shapes
             NormalVectorsCache.Clear();
         }
 
-        public void SetRenderScale(float scale, float offsetX, float ofssetY)
+        public void SetRenderScale(float scale, float offsetX, float ofssetY, float angleX, float angleY)
         {
             foreach (var vertex in Vertices)
             {
-                vertex.SetRenderSize(scale, offsetX, ofssetY);
+                vertex.SetRenderSize(scale, offsetX, ofssetY, angleX, angleY);
             }
         }
 

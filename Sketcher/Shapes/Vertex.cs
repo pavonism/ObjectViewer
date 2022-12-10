@@ -1,5 +1,4 @@
-﻿using SketcherControl.Geometrics;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace SketcherControl.Shapes
 {
@@ -7,10 +6,8 @@ namespace SketcherControl.Shapes
     {
         public Vector4 Location;
         public Vector4 NormalVector { get; set; }
-        public Vector4 RenderLocation => new Vector4(RenderX, RenderY, 0, 0);
+        public Vector4 RenderLocation;
 
-        public float RenderX { get; private set; }
-        public float RenderY { get; private set; }
         public Color Color { get; set; }
 
         public event Action? RenderCoordinatesChanged;
@@ -21,21 +18,27 @@ namespace SketcherControl.Shapes
             Location.Y = y;
             Location.Z = z;
 
-            RenderX = x;
-            RenderY = y;
+            RenderLocation.X = x;
+            RenderLocation.Y = y;
         }
 
-        public void SetRenderSize(float scale, float offsetX, float ofssetY)
+        public void SetRenderSize(float scale, float offsetX, float offsetY, float angleX = 0, float angleY = 0)
         {
-            RenderX = Location.X * scale + offsetX;
-            RenderY = Location.Y * scale + ofssetY;
+            Location.W = 1;
+            var translation = Matrix4x4.CreateTranslation(offsetX, offsetY, 0);
+            var scaleMatrix = Matrix4x4.CreateScale(scale);
+            var rotationX = Matrix4x4.CreateRotationX(angleX);
+            var rotationY = Matrix4x4.CreateRotationY(angleY);
+
+            RenderLocation = Vector4.Transform(Location, rotationY * rotationX * scaleMatrix * translation);
+            Location.W = 0;
 
             RenderCoordinatesChanged?.Invoke();
         }
 
         public void Render(DirectBitmap canvas)
         {
-            RectangleF rectangle = new RectangleF(RenderX - SketcherConstants.VertexPointRadius, canvas.Height - RenderY - SketcherConstants.VertexPointRadius,
+            RectangleF rectangle = new RectangleF(RenderLocation.X - SketcherConstants.VertexPointRadius, canvas.Height - RenderLocation.Y - SketcherConstants.VertexPointRadius,
                 2 * SketcherConstants.VertexPointRadius, 2 * SketcherConstants.VertexPointRadius);
 
             using (var g = Graphics.FromImage(canvas.Bitmap))

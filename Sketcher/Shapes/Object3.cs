@@ -71,7 +71,7 @@ namespace SketcherControl.Shapes
                 });
         }
 
-        public void SetRenderScale(float scale, float offsetX, float offsetY)
+        public void SetRenderScale(float scale, float offsetX, float offsetY, float angleX, float angleY)
         {
             this.scale = scale;
             this.offsetX = offsetX;
@@ -79,7 +79,7 @@ namespace SketcherControl.Shapes
 
             foreach (var triangle in triangles)
             {
-                triangle.SetRenderScale(scale, offsetX, offsetY);
+                triangle.SetRenderScale(scale, offsetX, offsetY, angleX, angleY);
             }
         }
     }

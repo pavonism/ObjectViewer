@@ -23,6 +23,14 @@ namespace SketcherControl
         /// Czy użytkownik przesuwa myszką źródło światłą?
         /// </summary>
         private bool lightIsMoving;
+        /// <summary>
+        /// Czy użytkownik obraca widok?
+        /// </summary>
+        private bool isRotating;
+
+        private float angleX;
+        private float angleY;
+        private Point lastMousePosition;
 
         private float objectScale;
         private int rows;
@@ -209,7 +217,7 @@ namespace SketcherControl
             for (int i = 0; i < this.objects.Count; i++)
             {
                 var rect = new Rectangle(i % this.columns * this.columnWidth, i / this.columns * this.rowHeight, this.columnWidth, this.rowHeight);
-                this.objects[i].SetRenderScale(this.objectScale, rect.CenterX(), rect.CenterY());
+                this.objects[i].SetRenderScale(this.objectScale, rect.CenterX(), rect.CenterY(), this.angleX, this.angleY);
             }
         }
 
@@ -227,6 +235,9 @@ namespace SketcherControl
         #region Overrides
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            this.lightIsMoving = false;
+            this.isRotating = false;
+
             if (LightSource.HitTest(e.X, e.Y))
             {
                 this.lightIsMoving = true;
@@ -235,8 +246,10 @@ namespace SketcherControl
             }
             else
             {
-                this.lightIsMoving = false;
+                this.isRotating = true;
+                this.lastMousePosition = e.Location;
             }
+
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -248,13 +261,32 @@ namespace SketcherControl
                 freeze = false;
                 Refresh();
             }
+            
+            if(this.isRotating)
+            {
+                var dx = e.Location.X - this.lastMousePosition.X;
+                var dy = e.Location.Y - this.lastMousePosition.Y;
+
+                this.angleX += (float)Math.PI / this.canvas.Height * dy;
+                this.angleY += (float)Math.PI / this.canvas.Width * dx;
+
+                this.angleX %= 2 * (float)Math.PI;
+                this.angleY %= 2 * (float)Math.PI;
+
+                SetRenderScales();
+                Refresh();
+            }
+         
+            this.lastMousePosition = e.Location;
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
+            this.lightIsMoving = false;
+            this.isRotating = false;
+
             if (this.lightIsMoving)
             {
-                this.lightIsMoving = false;
                 LightSource.LightAnimation = wasAnimationTurnedOn;
                 wasAnimationTurnedOn = false;
             }
