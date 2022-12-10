@@ -4,13 +4,13 @@ using System.Numerics;
 
 namespace SketcherControl.Filling
 {
-    public class ColorPicker
+    public class ColorPicker : IColorPicker
     {
         #region Fields and Events
         public event Action? ParametersChanged;
 
         private Interpolation interpolationMode;
-        private Vector4 targetColor = SketcherConstants.ThemeColor.ToVector();
+        private Color targetColor = SketcherConstants.ThemeColor;
         private float kD = 0.5f;
         private float kS = 0.5f;
         private int m = 4;
@@ -21,7 +21,7 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Properties
-        public Interpolation InterpolationMode
+        public virtual Interpolation InterpolationMode
         {
             get => this.interpolationMode;
             set
@@ -34,7 +34,7 @@ namespace SketcherControl.Filling
             }
         }
 
-        public float KD
+        public virtual float KD
         {
             get => this.kD;
             set
@@ -47,7 +47,7 @@ namespace SketcherControl.Filling
             }
         }
 
-        public float KS
+        public virtual float KS
         {
             get => this.kS;
             set
@@ -60,7 +60,7 @@ namespace SketcherControl.Filling
             }
         }
 
-        public int M
+        public virtual int M
         {
             get => this.m;
             set
@@ -73,52 +73,54 @@ namespace SketcherControl.Filling
             }
         }
 
-        public Color TargetColor
+        public virtual Color TargetColor
         {
-            get => this.targetColor.ToColor();
+            get => this.targetColor;
             set
             {
-                if (this.targetColor == value.ToVector())
+                if (this.targetColor == value)
                     return;
 
                 texture?.Dispose();
                 texture = null;
-                this.targetColor = value.ToVector();
+                this.targetColor = value;
                 ParametersChanged?.Invoke();
             }
         }
 
-        public Bitmap? Pattern
+        public virtual DirectBitmap? Pattern
         {
-            get => this.texture?.Bitmap;
+            get => this.texture;
             set
             {
-                if (value == null)
-                {
-                    this.texture = null;
-                }
-                else
-                {
-                    this.texture = new DirectBitmap(value);
-                }
-
+                if(this.texture == value) 
+                    return;
+                
+                this.texture = value;
                 ParametersChanged?.Invoke();
             }
         }
 
-        public Bitmap? NormalMap
+        public virtual DirectBitmap? NormalMap
         {
-            get => this.normalMap?.Bitmap;
+            get => this.normalMap;
             set
             {
-                if (value == null)
-                {
-                    this.normalMap = null;
-                }
-                else
-                {
-                    this.normalMap = new DirectBitmap(value);
-                }
+                if (this.normalMap == value)
+                    return;
+
+                this.normalMap = value;
+                ParametersChanged?.Invoke();
+            }
+        }
+
+        public virtual LightSource LightSource
+        {
+            get => this.lightSource;
+            set
+            {
+                if (this.lightSource != value)
+                    this.lightSource = value;
 
                 ParametersChanged?.Invoke();
             }
@@ -126,6 +128,10 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Initialization
+        public ColorPicker()
+        {
+        }
+
         public ColorPicker(LightSource lightSource)
         {
             this.lightSource = lightSource;
@@ -133,6 +139,15 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Logic
+        public virtual Vector4 Scale(Vector4 vector)
+        {
+            return vector;
+        }
+
+        public virtual Vector4 ScaleBack(Vector4 vector)
+        {
+            return vector;
+        }
 
         public void StartFillingTriangle(IEnumerable<Vertex> vertices)
         {
@@ -142,7 +157,7 @@ namespace SketcherControl.Filling
                 case Interpolation.Color:
                     foreach (var vertex in vertices)
                     {
-                        var textureColor = texture?.GetPixel(((int)vertex.RenderX + texture.Width / 2) % texture.Width, ((int)vertex.RenderY + texture.Height / 2) % texture.Height).ToVector();
+                        var textureColor = Pattern?.GetPixel(((int)vertex.RenderX + Pattern.Width / 2) % Pattern.Width, ((int)vertex.RenderY + Pattern.Height / 2) % Pattern.Height).ToVector();
                         var normalVector = NormalMap != null ? GetNormalVectorFromNormalMap((int)vertex.RenderX, (int)vertex.RenderY, vertex.NormalVector) : vertex.NormalVector;
                         vertex.Color = CalculateColorInPoint(vertex.Location, normalVector, textureColor);
                     }
@@ -191,7 +206,8 @@ namespace SketcherControl.Filling
             var normalVector = GetNormalVector(polygon, x, y, coefficients);
             var textureColor = GetTextureColor(x, y);
             var z = InterpolateZ(polygon, coefficients);
-            return CalculateColorInPoint(this.lightSource.Renderer.Unscale(x, y, z), normalVector, textureColor);
+            var renderLocation = new Vector4(x, y, z, 0);
+            return CalculateColorInPoint(ScaleBack(renderLocation), normalVector, textureColor);
         }
 
         private float[] GetBarycentricCoefficients(Polygon polygon, int x, int y)
@@ -210,7 +226,7 @@ namespace SketcherControl.Filling
         {
             var normalVector = GetNormalVectorFromInterpolation(polygon, x, y, coefficients);
 
-            if (normalMap != null)
+            if (NormalMap != null)
                 normalVector = GetNormalVectorFromNormalMap(x, y, normalVector);
 
             return normalVector;
@@ -218,7 +234,7 @@ namespace SketcherControl.Filling
 
         private Vector4? GetTextureColor(int x, int y)
         {
-            return this.texture?.GetPixel(x % texture.Width, y % texture.Height).ToVector();
+            return Pattern?.GetPixel(x % Pattern.Width, y % Pattern.Height).ToVector();
         }
 
         private float InterpolateZ(Polygon polygon, float[] coefficients)
@@ -228,9 +244,9 @@ namespace SketcherControl.Filling
 
         private Color CalculateColorInPoint(Vector4 location, Vector4 normalVector, Vector4? textureColor = null)
         {
-            Vector4 IL = this.lightSource.LightSourceVector;
-            Vector4 IO = textureColor ?? this.targetColor;
-            Vector4 L = Vector4.Normalize(this.lightSource.Location - location);
+            Vector4 IL = LightSource.LightSourceVector;
+            Vector4 IO = textureColor ?? TargetColor.ToVector();
+            Vector4 L = Vector4.Normalize(ScaleBack(LightSource.RenderLocation) - location);
             Vector4 R = 2 * Vector4.Dot(normalVector, L) * normalVector - L;
 
             var angleNL = Vector4.Dot(normalVector, L);
@@ -244,7 +260,7 @@ namespace SketcherControl.Filling
 
         private Vector4 GetNormalVectorFromNormalMap(int x, int y, Vector4 NSurface)
         {
-            var textureColor = this.normalMap!.GetPixel(x % normalMap.Width, y % normalMap.Height);
+            var textureColor = NormalMap!.GetPixel(x % NormalMap.Width, y % NormalMap.Height);
             var NTexture = textureColor.ToNormalMapVector();
             var B = Vector4.Normalize(NSurface.Cross(new Vector4(0, 0, 1, 0)));
             var T = Vector4.Normalize(B.Cross(NSurface));

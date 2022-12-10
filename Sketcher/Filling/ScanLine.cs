@@ -22,7 +22,7 @@ namespace SketcherControl.Filling
             return sortedEdges;
         }
 
-        public static void Fill(Polygon polygon, DirectBitmap canvas, ColorPicker colorPicker)
+        public static void Fill(Polygon polygon, DirectBitmap canvas, IColorPicker colorPicker)
         {
             colorPicker.StartFillingTriangle(polygon.Vertices);
             polygon.GetMaxPoints(out var maxPoint, out var minPoint);

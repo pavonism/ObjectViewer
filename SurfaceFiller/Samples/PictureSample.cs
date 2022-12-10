@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SketcherControl;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,12 @@ namespace SurfaceFiller.Samples
 {
     internal class PictureSample : Sample
     {
-        public Bitmap? Image { get; private set; }
+        public DirectBitmap? Image { get; private set; }
 
         public PictureSample(Bitmap? image, string name) : base(name)
         {
-            Image = image;
+            if(image != null)
+                Image = new(image);
         }
 
         public override Image GetThumbnail(int width, int height)

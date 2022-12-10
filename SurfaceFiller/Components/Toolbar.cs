@@ -10,13 +10,23 @@ namespace SurfaceFiller.Components
     /// </summary>
     public class Toolbar : FlowLayoutPanel
     {
-        private TableLayoutPanel? currentRadioBox;
+        private Stack<FlowLayoutPanel> sections = new();
 
         public Toolbar()
         {
             Dock = DockStyle.Fill;
             Padding = Padding.Empty;
-            Height = FormConstants.MinimumControlSize;
+        }
+
+        private void AddControl(Control control)
+        {
+            if (sections.Count == 0)
+                Controls.Add(control);
+            else
+            {
+                sections.Peek().Controls.Add(control);
+                sections.Peek().Height += control.Height;
+            }
         }
 
         public void AddLabel(string text)
@@ -37,17 +47,17 @@ namespace SurfaceFiller.Components
             };
 
             table.Controls.Add(label);
-            Controls.Add(table);
+            AddControl(table);
         }
 
         public void AddDivider()
         {
-            Controls.Add(new Divider());
+            AddControl(new Divider());
         }
 
         public void AddSpacing()
         {
-            Controls.Add(new Spacing(5));
+            AddControl(new Spacing(5));
         }
 
         private T AddSlider<T>(string labelText) where T : Slider, new()
@@ -59,7 +69,7 @@ namespace SurfaceFiller.Components
                 LabelText = labelText,
             };
 
-            Controls.Add(slider);
+            AddControl(slider);
             return slider;
         }
 
@@ -100,14 +110,14 @@ namespace SurfaceFiller.Components
             button.Lock = defaultState;
             AddTooltip(button, hint);
             button.OnOptionChanged += handler;
-            Controls.Add(button);
+            AddControl(button);
         }
 
         public void AddProcessButton(Action handler, string glyph, string? hint = null)
         {
             var button = new ProcessButton(handler) { Text = glyph };
             AddTooltip(button, hint);
-            Controls.Add(button);
+            AddControl(button);
         }
 
         public Button AddButton(EventHandler handler, string glyph, string? hint = null)
@@ -120,7 +130,7 @@ namespace SurfaceFiller.Components
 
             AddTooltip(button, hint);
             button.Click += handler;
-            Controls.Add(button);
+            AddControl(button);
 
             return button;
         }
@@ -138,11 +148,11 @@ namespace SurfaceFiller.Components
             button.OnOptionChanged += handler;
 
             AddTooltip(button, hint);
-            Controls.Add(button);
+            AddControl(button);
             return button;
         }
 
-        public CheckBox AddOption(EventHandler onOptionChanged, string text, string? hint = null)
+        public CheckBox AddOption(EventHandler onOptionChanged, string text, string? hint = null, bool defaultValue = false)
         {
             var checkBox = new CheckBox()
             {
@@ -150,6 +160,7 @@ namespace SurfaceFiller.Components
                 TextAlign = ContentAlignment.MiddleLeft,
                 Text = text,
             };
+
 
             var table = new TableLayoutPanel()
             {
@@ -161,7 +172,8 @@ namespace SurfaceFiller.Components
             AddTooltip(checkBox, hint);
 
             checkBox.CheckedChanged += onOptionChanged;
-            Controls.Add(table);
+            checkBox.Checked = defaultValue;
+            AddControl(table);
             return checkBox;
         }
 
@@ -174,7 +186,7 @@ namespace SurfaceFiller.Components
 
             combo.ValuePicked += valuePickedHandler;
 
-            Controls.Add(combo);
+            AddControl(combo);
             return combo;
         }
 
@@ -187,25 +199,31 @@ namespace SurfaceFiller.Components
 
             combo.ValuePicked += valuePickedHandler;
 
-            Controls.Add(combo);
+            AddControl(combo);
             return combo;
         }
 
-        public void CreateNewRadioBox()
+        public FlowLayoutPanel StartSection()
         {
-            this.currentRadioBox = new TableLayoutPanel()
+            var newSection = new FlowLayoutPanel()
             {
                 Dock = DockStyle.Top,
+                Height = FormConstants.MinimumControlSize,
+                Width = this.Width
             };
 
-            Controls.Add(this.currentRadioBox);
+            this.sections.Push(newSection);
+            Controls.Add(newSection);
+            return newSection;
+        }
+
+        public void EndSection()
+        {
+            this.sections.Pop();
         }
 
         public void AddRadioOption(EventHandler clickHandler, string label, string? hint = null, bool? selected = null)
         {
-            if (this.currentRadioBox == null)
-                throw new Exception("RadioBox not found! Try to use CreateNewRadioBox()");
-
             var radio = new RadioButton()
             {
                 Text = label,
@@ -218,8 +236,7 @@ namespace SurfaceFiller.Components
             radio.Click += clickHandler;
 
             AddTooltip(radio, hint);
-            this.currentRadioBox.Controls.Add(radio);
-            this.currentRadioBox.Height = this.currentRadioBox.Controls.Count * FormConstants.MinimumControlSize;
+            AddControl(radio);
         }
     }
 }

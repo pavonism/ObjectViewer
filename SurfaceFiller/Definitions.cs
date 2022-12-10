@@ -1,4 +1,6 @@
 ﻿
+using System.CodeDom;
+
 namespace SurfaceFiller
 {
     public static class Defaults
@@ -41,6 +43,7 @@ namespace SurfaceFiller
     {
         public const string ThreadSlider = "Threads";
         public const string ShowLinesOption = "Show lines";
+        public const string FillObjectsOption = "Fill objects";
         public const string VectorsInterpolationOption = "Vectors Interpolation";
         public const string ColorInterpolationOption = "Color Interpolation";
         public const string ModelParameters = "Model Parameters";
@@ -73,6 +76,7 @@ namespace SurfaceFiller
     {
         public const string OpenOBJ = "Załaduj powierzchnię z pliku *.obj";
         public const string Fill = "Włącz / wyłącz wypełenienie powierzchni";
+        public const string FillObjects = "Włącz / wyłącz wypełnianie obiektów";
         public const string ShowLines = "Pokaż linie triangulacji";
         public const string ColorInterpolation = "Włącz tryb interpolacji kolorów";
         public const string VectorInterpolation = "Włącz tryb interpolacji wektorów normalnych";

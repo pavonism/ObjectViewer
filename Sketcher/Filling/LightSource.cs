@@ -24,11 +24,14 @@ namespace SketcherControl.Filling
         private bool showTrack;
         private MoveDirection moveDirection = MoveDirection.Forward;
         private Timer timer = new();
+        private bool show = false;
         #endregion
 
         #region Properties
         public float MinZ { get; set; } = 1f;
-        public Vector4 Location => Renderer.Unscale(xSun, Renderer.Size.Height - ySun, MinZ + 3 * MinZ * lightLocationZ);
+        public Vector4 RenderLocation => new Vector4(xSun, Renderer.Size.Height - ySun, MinZ + 3 * MinZ * lightLocationZ, 1);
+
+        public bool Show { get; set; }
 
         public bool ShowTrack
         {
@@ -133,13 +136,15 @@ namespace SketcherControl.Filling
 
             this.timer.Interval = 32;
             this.timer.Tick += Timer_Tick;
-            timer.Start();
         }
         #endregion
 
         #region Rendering
         public void Render(DirectBitmap canvas)
         {
+            if (!Show)
+                return;
+
             if (Renderer.Size.Width > xSun && xSun > 0 && ySun > 0 && ySun < Renderer.Size.Height)
                 using (var g = Graphics.FromImage(canvas.Bitmap))
                 {

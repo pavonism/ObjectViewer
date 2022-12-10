@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using SketcherControl.Geometrics;
+using System.Numerics;
 
 namespace SketcherControl.Shapes
 {

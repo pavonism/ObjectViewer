@@ -1,4 +1,5 @@
 ﻿using SketcherControl.Filling;
+using SketcherControl.Geometrics;
 using SketcherControl.Shapes;
 using System.Numerics;
 using Timer = System.Windows.Forms.Timer;
@@ -8,7 +9,7 @@ namespace SketcherControl
     public class Sketcher : PictureBox, IRenderer
     {
         DirectBitmap canvas;
-        private readonly List<Triangle> triangles = new();
+        private List<Object3> objects = new();
         private Timer resizeTimer;
         /// <summary>
         /// Blokuje renderowanie sceny
@@ -22,12 +23,17 @@ namespace SketcherControl
         /// Czy użytkownik przesuwa myszką źródło światłą?
         /// </summary>
         private bool lightIsMoving;
+
         private float objectScale;
+        private int rows;
+        private int columns;
+        private int columnWidth;
+        private int rowHeight;
 
         public int RenderThreads { get; set; }
         public LightSource LightSource { get; }
         public ColorPicker ColorPicker { get; }
-        public bool Fill { get; set; } = true;
+        public bool Fill { get; set; } = false;
         public SizeF ObjectSize{ get; set; }
 
         public Size BitmpapSize
@@ -75,7 +81,7 @@ namespace SketcherControl
 
         public void LoadObject(string shapeObject)
         {
-            this.triangles.Clear();
+            List<Triangle> triangles = new List<Triangle>();
             PointF minPoint = new(float.MaxValue, float.MaxValue);
             PointF maxPoint = new(float.MinValue, float.MinValue);
             LightSource.MinZ = float.MinValue;
@@ -123,13 +129,15 @@ namespace SketcherControl
                     triangle.AddVertex(vertices[int.Parse(vertexIndex[0]) - 1], normalVectors[int.Parse(vertexIndex[1]) - 1]);
                 }
 
-                this.triangles.Add(triangle);
+                triangles.Add(triangle);
                 triangle = new();
             }
 
-            ObjectSize = new(Math.Abs(maxPoint.X - minPoint.X), Math.Abs(maxPoint.Y - minPoint.Y));
-            CalculateObjectScale();
-            SetRenderScale();
+            var objectSize = new SizeF(Math.Abs(maxPoint.X - minPoint.X), Math.Abs(maxPoint.Y - minPoint.Y));
+            this.objects.Add(new Object3(triangles, objectSize));
+            ObjectSize = new(Math.Max(ObjectSize.Width, objectSize.Width), Math.Max(ObjectSize.Height, objectSize.Height));
+            RecalculateRenderScale();
+            SetRenderScales();
             Refresh();
         }
         #endregion
@@ -138,19 +146,6 @@ namespace SketcherControl
         private void ParametersChangedHandler()
         {
             Refresh();
-        }
-
-        private Task FillAsync(int start, int step)
-        {
-            return Task.Run(
-                () =>
-                {
-                    for (int j = start; j < start + step && j < this.triangles.Count; j++)
-                    {
-                        ScanLine.Fill(this.triangles[j], canvas, ColorPicker);
-
-                    }
-                });
         }
 
         public override void Refresh()
@@ -163,31 +158,10 @@ namespace SketcherControl
                 g.Clear(Color.White);
             }
 
-            if(RenderThreads == 1 && Fill)
+            foreach (var obj in this.objects)
             {
-                foreach (var triangle in this.triangles)
-                {
-                    ScanLine.Fill(triangle, this.canvas, ColorPicker);
-                }
+                obj.Render(this.canvas, ShowLines, Fill ? ColorPicker : null);
             }
-            else if (Fill)
-            {
-                var trianglesPerThread = (int)Math.Ceiling((float)this.triangles.Count / RenderThreads);
-                List<Task> tasks = new();
-
-                for (int i = 0; i < RenderThreads; i++)
-                {
-                    tasks.Add(FillAsync(i * trianglesPerThread, trianglesPerThread));
-                }
-
-                Task.WaitAll(tasks.ToArray());
-            }
-
-            if (ShowLines)
-                foreach (var triangle in triangles)
-                {
-                    triangle.Render(this.canvas);
-                }
 
             LightSource.Render(this.canvas);
 
@@ -198,12 +172,22 @@ namespace SketcherControl
         {
             this.resizeTimer.Stop();
             BitmpapSize = new Size(this.Width, this.Height);
-            CalculateObjectScale();
-            SetRenderScale();
+            RecalculateRenderScale();
+            SetRenderScales();
             this.LightSource.LightAnimation = this.wasAnimationTurnedOn;
             this.freeze = false;
             LightSource.RecalculateLightCoordinates();
             Refresh();
+        }
+
+        private void RecalculateRenderScale()
+        {
+            this.rows = (int)Math.Sqrt(this.objects.Count);
+            this.columns = (int)Math.Ceiling((float)this.objects.Count / rows);
+
+            this.columnWidth = this.canvas.Width / columns;
+            this.rowHeight = this.canvas.Height / rows;
+            this.objectScale = 0.8f * Math.Min(this.columnWidth, this.rowHeight) / Math.Max(ObjectSize.Width, ObjectSize.Height);
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -220,16 +204,12 @@ namespace SketcherControl
             this.resizeTimer.Start();
         }
 
-        private void CalculateObjectScale()
+        private void SetRenderScales()
         {
-            this.objectScale = 0.8f * Math.Min(canvas.Width, canvas.Height) / Math.Max(ObjectSize.Width, ObjectSize.Height);
-        }
-
-        private void SetRenderScale()
-        {
-            foreach (var triangle in triangles)
+            for (int i = 0; i < this.objects.Count; i++)
             {
-                triangle.SetRenderScale(this.objectScale, (float)canvas.Width / 2, (float)canvas.Height / 2);
+                var rect = new Rectangle(i % this.columns * this.columnWidth, i / this.columns * this.rowHeight, this.columnWidth, this.rowHeight);
+                this.objects[i].SetRenderScale(this.objectScale, rect.CenterX(), rect.CenterY());
             }
         }
 

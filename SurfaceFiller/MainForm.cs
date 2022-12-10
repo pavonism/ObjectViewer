@@ -10,6 +10,7 @@ namespace SurfaceFiller
     {
         private TableLayoutPanel mainTableLayout = new();
         private Toolbar toolbar = new() { Width = FormConstants.ToolbarWidth };
+        private FlowLayoutPanel fillSection;
         private Sketcher sketcher = new();
         private ComboPicker<BasicSample> objectCombo;
         private ComboPickerWithImage<Sample> objectSurfaceCombo;
@@ -34,20 +35,23 @@ namespace SurfaceFiller
             this.objectCombo = this.toolbar.AddComboPicker<BasicSample>(ObjectPickedHandler);
             this.toolbar.AddButton(OpenFileHandler, Glyphs.File, Hints.OpenOBJ);
             this.toolbar.AddTool(FillHandler, Glyphs.Bucket, Hints.Fill);
-            this.toolbar.AddSlider(ThreadsSlidrerHandler, Labels.ThreadSlider, Defaults.ThreadsCount);
+            //this.toolbar.AddSlider(ThreadsSlidrerHandler, Labels.ThreadSlider, Defaults.ThreadsCount);
             this.toolbar.AddDivider();
-            this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines);
-            this.toolbar.CreateNewRadioBox();
+            this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, true);
+            this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, false);
+            this.toolbar.StartSection();
             this.toolbar.AddRadioOption(ColorInterpolationOptionHandler, Labels.ColorInterpolationOption, Hints.ColorInterpolation, true);
             this.toolbar.AddRadioOption(VectorInterpolationOptionHandler, Labels.VectorsInterpolationOption, Hints.VectorInterpolation);
+            this.toolbar.EndSection();
             this.toolbar.AddDivider();
+            this.fillSection = this.toolbar.StartSection();
             this.toolbar.AddLabel(Labels.ModelParameters);
             this.toolbar.AddFractSlider(KDParameterHandler, Labels.KDParameter, Defaults.KDParameter);
             this.toolbar.AddFractSlider(KSParameterHandler, Labels.KSParameter, Defaults.KSParameter);
             this.toolbar.AddSlider(MParameterHandler, Labels.MParameter, Defaults.MParameter);
             this.toolbar.AddDivider();
             this.toolbar.AddLabel(Labels.LightSection);
-            this.toolbar.AddPlayPouse(SunHandler, true);
+            this.toolbar.AddPlayPouse(SunHandler, false);
             this.toolbar.AddProcessButton(RewindHandler, Glyphs.Rewind);
             this.toolbar.AddProcessButton(MoveForwardHandler, Glyphs.Forward);
             this.toolbar.AddButton(LightColorButtonHandler, Glyphs.Palette, Hints.ChangeLightColor);
@@ -62,6 +66,8 @@ namespace SurfaceFiller
             this.toolbar.AddButton(LoadTextureHandlar, Glyphs.File, Hints.LoadObjectPattern);
             this.normalMapCombo = this.toolbar.AddComboImagePicker<Sample>(NormalMapPickedHandler);
             this.toolbar.AddButton(VectorMapHandler, Glyphs.File, Hints.LoadNormalMap);
+            this.toolbar.EndSection();
+            this.fillSection.Enabled = false;
         }
 
         private void InitializeForm()
@@ -84,6 +90,13 @@ namespace SurfaceFiller
         #endregion
 
         #region Handlers 
+        private void FillObjectsHandler(object? sender, EventArgs e)
+        {
+            this.sketcher.Fill = !this.sketcher.Fill;
+            this.fillSection.Enabled = this.sketcher.Fill;
+            this.sketcher.LightSource.Show = this.sketcher.Fill;
+        }
+
         private void VectorInterpolationOptionHandler(object? sender, EventArgs e)
         {
             this.sketcher.ColorPicker.InterpolationMode = Interpolation.NormalVector;
