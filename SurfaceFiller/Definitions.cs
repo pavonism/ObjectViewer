@@ -22,15 +22,17 @@ namespace SurfaceFiller
         public const string NormalMapsAssets = @"..\..\..\..\Assets\NormalMaps";
         public const string ObjectAssets = @"..\..\..\..\Assets\Objects";
         public const string DefaultObject = "Sphere";
+
+        public static Color ThemeColor = Color.FromArgb(255, 0, 120, 215);
     }
 
     public static class FormConstants
     {
         public const int MinimumWindowSizeX = 700;
-        public const int MinimumWindowSizeY = 750;
+        public const int MinimumWindowSizeY = 800;
 
         public const int InitialWindowSizeX = 900;
-        public const int InitialWindowSizeY = 750;
+        public const int InitialWindowSizeY = 800;
 
         public const int MainFormColumnCount = 2;
         public const int MinimumControlSize = 32;
@@ -41,6 +43,7 @@ namespace SurfaceFiller
 
     public static class Labels
     {
+        public const string ApplyButtonLabel = "Add";
         public const string ThreadSlider = "Threads";
         public const string ShowLinesOption = "Show lines";
         public const string FillObjectsOption = "Fill objects";

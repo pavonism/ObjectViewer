@@ -190,6 +190,9 @@ namespace SketcherControl
 
         private void RecalculateRenderScale()
         {
+            if (this.objects.Count == 0)
+                return;
+
             this.rows = (int)Math.Sqrt(this.objects.Count);
             this.columns = (int)Math.Ceiling((float)this.objects.Count / rows);
 
@@ -290,6 +293,15 @@ namespace SketcherControl
                 LightSource.LightAnimation = wasAnimationTurnedOn;
                 wasAnimationTurnedOn = false;
             }
+        }
+
+        public void Clear()
+        {
+            this.objects.Clear();
+            Refresh();
+            this.angleX = 0;
+            this.angleY = 0;
+            ObjectSize = new Size(0, 0);
         }
         #endregion
     }

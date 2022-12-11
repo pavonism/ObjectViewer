@@ -2,6 +2,7 @@
 using Microsoft.VisualBasic.Devices;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
+using ToolbarControls;
 
 namespace SurfaceFiller.Components
 {
@@ -201,6 +202,20 @@ namespace SurfaceFiller.Components
 
             AddControl(combo);
             return combo;
+        }
+
+        public ICombo<T> AddComboApply<T>(Action<T> applyHandler, string? buttonLabel = null, string? hint = null)
+        {
+            var comboApply = new ComboApply<ComboPicker<T>, T>();
+            comboApply.Width = Width;
+            comboApply.Height = FormConstants.MinimumControlSize + 10;
+            comboApply.Apply += applyHandler;
+            comboApply.Hint = hint;
+            comboApply.ButtonLabel = buttonLabel;
+
+            comboApply.Margin = new Padding(0, 5, 0, 5);
+            AddControl(comboApply);
+            return comboApply;
         }
 
         public FlowLayoutPanel StartSection()

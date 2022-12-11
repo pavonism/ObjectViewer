@@ -81,6 +81,73 @@ namespace SurfaceFiller.Components
         }
     }
 
+    public class RoundedButton : OptionButton
+    {
+        private bool mouseIsHovering;
+
+        public RoundedButton()
+        {
+            this.Height = int.MinValue;
+            this.SetStyle(ControlStyles.UserPaint, true);
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            this.mouseIsHovering = false;
+            base.OnMouseLeave(e);
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            this.mouseIsHovering = true;
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.Clear(Parent.BackColor);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            e.Graphics.FillPath(new SolidBrush(Resources.ThemeColor), RoundedRect(e.ClipRectangle, (int)(0.1 * e.ClipRectangle.Width)));
+
+            StringFormat stringFormat = new StringFormat();
+            stringFormat.Alignment = StringAlignment.Center;
+            stringFormat.LineAlignment = StringAlignment.Center;
+            e.Graphics.DrawString(Text, Font, new SolidBrush(mouseIsHovering ? Color.LightGray : ForeColor), e.ClipRectangle, stringFormat);
+        }
+
+        private GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        {
+            int diameter = radius * 2;
+            Size size = new Size(diameter, diameter);
+            Rectangle arc = new Rectangle(bounds.Location, size);
+            GraphicsPath path = new GraphicsPath();
+
+            if (radius == 0)
+            {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            // top left arc  
+            path.AddArc(arc, 180, 90);
+
+            // top right arc  
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+
+            // bottom right arc  
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+
+            // bottom left arc 
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+
+            path.CloseFigure();
+            return path;
+        }
+    }
+
     /// <summary>
     /// Implementuje okrągły przycisk
     /// </summary>

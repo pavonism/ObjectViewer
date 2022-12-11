@@ -3,6 +3,7 @@ using SketcherControl.Filling;
 using SurfaceFiller.Components;
 using SurfaceFiller.Samples;
 using System.Drawing.Imaging;
+using ToolbarControls;
 
 namespace SurfaceFiller
 {
@@ -12,7 +13,7 @@ namespace SurfaceFiller
         private Toolbar toolbar = new() { Width = FormConstants.ToolbarWidth };
         private FlowLayoutPanel fillSection;
         private Sketcher sketcher = new();
-        private ComboPicker<BasicSample> objectCombo;
+        private ICombo<BasicSample> objectCombo;
         private ComboPickerWithImage<Sample> objectSurfaceCombo;
         private ComboPickerWithImage<Sample> normalMapCombo;
         private ColorSample colorSample;
@@ -32,9 +33,9 @@ namespace SurfaceFiller
         {
             this.toolbar.AddLabel(Resources.ProgramTitle);
             this.toolbar.AddDivider();
-            this.objectCombo = this.toolbar.AddComboPicker<BasicSample>(ObjectPickedHandler);
+            this.objectCombo = this.toolbar.AddComboApply<BasicSample>(ObjectPickedHandler, Labels.ApplyButtonLabel);
             this.toolbar.AddButton(OpenFileHandler, Glyphs.File, Hints.OpenOBJ);
-            this.toolbar.AddTool(FillHandler, Glyphs.Bucket, Hints.Fill);
+            this.toolbar.AddButton(ClearHandler, Glyphs.Reset);
             //this.toolbar.AddSlider(ThreadsSlidrerHandler, Labels.ThreadSlider, Defaults.ThreadsCount);
             this.toolbar.AddDivider();
             this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, true);
@@ -68,6 +69,11 @@ namespace SurfaceFiller
             this.toolbar.AddButton(VectorMapHandler, Glyphs.File, Hints.LoadNormalMap);
             this.toolbar.EndSection();
             this.fillSection.Enabled = false;
+        }
+
+        private void ClearHandler(object? sender, EventArgs e)
+        {
+            this.sketcher.Clear();
         }
 
         private void InitializeForm()
@@ -218,12 +224,6 @@ namespace SurfaceFiller
         private void ShowLinesHandler(object? sender, EventArgs e)
         {
             this.sketcher.ShowLines = !this.sketcher.ShowLines;
-            this.sketcher.Refresh();
-        }
-
-        private void FillHandler(bool obj)
-        {
-            this.sketcher.Fill = !this.sketcher.Fill;
             this.sketcher.Refresh();
         }
 
