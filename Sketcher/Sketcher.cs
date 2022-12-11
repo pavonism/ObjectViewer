@@ -233,6 +233,15 @@ namespace SketcherControl
                 Z = z,
             };
         }
+
+        public void Clear()
+        {
+            this.objects.Clear();
+            Refresh();
+            this.angleX = 0;
+            this.angleY = 0;
+            ObjectSize = new Size(0, 0);
+        }
         #endregion
 
         #region Overrides
@@ -293,15 +302,6 @@ namespace SketcherControl
                 LightSource.LightAnimation = wasAnimationTurnedOn;
                 wasAnimationTurnedOn = false;
             }
-        }
-
-        public void Clear()
-        {
-            this.objects.Clear();
-            Refresh();
-            this.angleX = 0;
-            this.angleY = 0;
-            ObjectSize = new Size(0, 0);
         }
         #endregion
     }
