@@ -50,7 +50,8 @@ namespace SketcherControl.Filling
                     {
                         //var color = colorPicker.GetColor(polygon, xi, y + minPoint.Y);
                         var color = SketcherConstants.ThemeColor;
-                        canvas.SetPixel(xi, y + minPoint.Y, color);
+                        if (canvas.GetPixel(xi, y + minPoint.Y) != Color.Black)
+                            canvas.SetPixel(xi, y + minPoint.Y, color);
                     }
                 }
 

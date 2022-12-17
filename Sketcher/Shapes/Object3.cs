@@ -1,7 +1,5 @@
 ﻿
 using SketcherControl.Filling;
-using SketcherControl.Geometrics;
-using System.Drawing;
 using System.Numerics;
 
 namespace SketcherControl.Shapes
@@ -10,12 +8,13 @@ namespace SketcherControl.Shapes
     {
         private int objectIndx;
         private int RenderThreads = 50;
-        private float scale;
-        private float offsetX;
-        private float offsetY;
         private readonly List<Triangle> triangles = new();
         private float rotationX;
         private float rotationY;
+
+        private Matrix4x4 model;
+        private Matrix4x4 view;
+        private Matrix4x4 position;
 
         public SizeF ObjectSize { get; private set; }
 
@@ -31,7 +30,7 @@ namespace SketcherControl.Shapes
 
             if(colorPicker != null)
             {
-                var colorPickerWithScale = new ColorPickerWithScale(colorPicker, scale, offsetX, offsetY);
+                var colorPickerWithScale = new ColorPickerWithScale(colorPicker, model * view * position, bitmap.Width, bitmap.Height);
 
                 if (RenderThreads == 1)
                 {
@@ -70,23 +69,28 @@ namespace SketcherControl.Shapes
                 {
                     for (int j = start; j < start + step && j < this.triangles.Count; j++)
                     {
-                        ScanLine.Fill(this.triangles[j], bitmap, colorPicker);
-
+                        if (this.triangles[j].IsVisible(bitmap.Width, bitmap.Height))
+                            ScanLine.Fill(this.triangles[j], bitmap, colorPicker);
                     }
                 });
         }
 
         public void SetRenderScale(int width, int height, Vector3 cameraPosition, float fov, float angleX, float angleY)
         {
+            if (this.objectIndx % 2 == 0)
+                this.rotationX -= 2 * (float)Math.PI / height;
+            else
+                this.rotationX += 2 * (float)Math.PI / width;
 
-            //if(this.objectIndx % 2 == 0)
-            //    this.rotationX -= 2 * (float)Math.PI / height;
-            //else
-            //    this.rotationX += 2 * (float)Math.PI / width;
+            var rotationX = Matrix4x4.CreateRotationX(this.rotationX);
+            var rotationY = Matrix4x4.CreateRotationY(this.rotationY);
+            this.model = rotationX * rotationY;
+            this.view = Matrix4x4.CreateLookAt(cameraPosition, new Vector3(0, 0, 0), new Vector3(0, 0, 1));
+            this.position = Matrix4x4.CreatePerspectiveFieldOfView(fov, (float)width / height, 1, 50);
 
             foreach (var triangle in triangles)
             {
-                triangle.SetRenderScale(width, height, cameraPosition, fov, this.rotationX, this.rotationY);
+                triangle.SetRenderScale(width, height, this.model, this.view, this.position);
             }
         }
     }

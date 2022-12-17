@@ -38,11 +38,11 @@ namespace SketcherControl.Shapes
             NormalVectorsCache.Clear();
         }
 
-        public void SetRenderScale(int width, int height, Vector3 cameraPosition, float fov, float angleX, float angleY)
+        public void SetRenderScale(int width, int height, Matrix4x4 model, Matrix4x4 view, Matrix4x4 position)
         {
             foreach (var vertex in Vertices)
             {
-                vertex.SetRenderSize(width, height, cameraPosition, fov, angleX, angleY);
+                vertex.Transform(width, height, model, view, position);
             }
 
             foreach (var edge in Edges)
@@ -56,6 +56,9 @@ namespace SketcherControl.Shapes
 
         public void Render(DirectBitmap canvas)
         {
+            if (!IsVisible(canvas.Width, canvas.Height))
+                return;
+
             foreach (var vertex in Vertices)
             {
                 vertex.Render(canvas);
@@ -65,6 +68,12 @@ namespace SketcherControl.Shapes
             {
                 edge.Render(canvas);
             }
+        }
+
+        public bool IsVisible(int width, int height)
+        {
+            GetMaxPoints(out var max, out var min);
+            return max.X < width && max.Y < height && min.X >= 0 && min.Y >= 0;
         }
     }
 }
