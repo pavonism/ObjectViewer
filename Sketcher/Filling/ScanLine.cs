@@ -48,7 +48,8 @@ namespace SketcherControl.Filling
                 {
                     for (int xi = (int)AET[i - 1].DrawingX; xi <= AET[i].DrawingX; xi++)
                     {
-                        var color = colorPicker.GetColor(polygon, xi, y + minPoint.Y);
+                        //var color = colorPicker.GetColor(polygon, xi, y + minPoint.Y);
+                        var color = SketcherConstants.ThemeColor;
                         canvas.SetPixel(xi, y + minPoint.Y, color);
                     }
                 }

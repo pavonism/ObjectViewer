@@ -22,17 +22,22 @@ namespace SketcherControl.Shapes
             RenderLocation.Y = y;
         }
 
-        public void SetRenderSize(float scale, float offsetX, float offsetY, float angleX = 0, float angleY = 0)
+        public void SetRenderSize(int width, int height, Vector3 cameraPosition, float fov, float angleX = 0, float angleY = 0)
         {
             Location.W = 1;
-            var translation = Matrix4x4.CreateTranslation(offsetX, offsetY, 0);
-            var scaleMatrix = Matrix4x4.CreateScale(scale);
             var rotationX = Matrix4x4.CreateRotationX(angleX);
             var rotationY = Matrix4x4.CreateRotationY(angleY);
 
-            RenderLocation = Vector4.Transform(Location, rotationY * rotationX * scaleMatrix * translation);
-            Location.W = 0;
+            var modelMatrix = rotationX * rotationY;
+            var viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, new Vector3(0, 0, 0), new Vector3(0, 0, 1));
+            var positionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(fov, (float)width / height, 1, 50);
 
+            RenderLocation = Vector4.Transform(Location, modelMatrix * viewMatrix * positionMatrix);
+            RenderLocation /= RenderLocation.W;
+            RenderLocation.X *= width / 2;
+            RenderLocation.Y *= height / 2;
+            RenderLocation.X += width / 2;
+            RenderLocation.Y += height / 2;
             RenderCoordinatesChanged?.Invoke();
         }
 

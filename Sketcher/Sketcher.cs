@@ -11,6 +11,7 @@ namespace SketcherControl
         DirectBitmap canvas;
         private List<Object3> objects = new();
         private Timer resizeTimer;
+        private Timer rotationTimer;
         /// <summary>
         /// Blokuje renderowanie sceny
         /// </summary>
@@ -37,6 +38,34 @@ namespace SketcherControl
         private int columns;
         private int columnWidth;
         private int rowHeight;
+
+        private float fov = (float)Math.PI / 6;
+        public float FOV
+        {
+            get => this.fov;
+            set
+            {
+                if (this.fov != value)
+                {
+                    this.fov = value;
+                    TransformAndRefresh();
+                }
+            }
+        }
+
+        private Vector3 cameraVector = new Vector3(2, 2, 2);
+        public Vector3 CameraVector
+        {
+            get => this.cameraVector;
+            set
+            {
+                if(this.cameraVector != value) 
+                {
+                    this.cameraVector = value;
+                    TransformAndRefresh();
+                }
+            }
+        }
 
         public int RenderThreads { get; set; }
         public LightSource LightSource { get; }
@@ -71,6 +100,16 @@ namespace SketcherControl
             this.resizeTimer.Tick += ResizeTimerHandler;
             LightSource.LightSourceChanged += ParametersChangedHandler;
             ColorPicker.ParametersChanged += ParametersChangedHandler;
+
+            this.rotationTimer = new();
+            this.rotationTimer.Interval = 40;
+            this.rotationTimer.Tick += RotationTimer_Tick;
+            this.rotationTimer.Start();
+        }
+
+        private void RotationTimer_Tick(object? sender, EventArgs e)
+        {
+            TransformAndRefresh();
         }
 
         #region Loading Object
@@ -142,7 +181,7 @@ namespace SketcherControl
             }
 
             var objectSize = new SizeF(Math.Abs(maxPoint.X - minPoint.X), Math.Abs(maxPoint.Y - minPoint.Y));
-            this.objects.Add(new Object3(triangles, objectSize));
+            this.objects.Add(new Object3(triangles, objectSize, this.objects.Count - 1));
             ObjectSize = new(Math.Max(ObjectSize.Width, objectSize.Width), Math.Max(ObjectSize.Height, objectSize.Height));
             RecalculateRenderScale();
             SetRenderScales();
@@ -215,12 +254,18 @@ namespace SketcherControl
             this.resizeTimer.Start();
         }
 
+        private void TransformAndRefresh()
+        {
+            SetRenderScales();
+            Refresh();
+        }
+
         private void SetRenderScales()
         {
             for (int i = 0; i < this.objects.Count; i++)
             {
-                var rect = new Rectangle(i % this.columns * this.columnWidth, i / this.columns * this.rowHeight, this.columnWidth, this.rowHeight);
-                this.objects[i].SetRenderScale(this.objectScale, rect.CenterX(), rect.CenterY(), this.angleX, this.angleY);
+                //var rect = new Rectangle(i % this.columns * this.columnWidth, i / this.columns * this.rowHeight, this.columnWidth, this.rowHeight);
+                this.objects[i].SetRenderScale(this.canvas.Width, this.canvas.Height, CameraVector, FOV, angleX, angleY);
             }
         }
 

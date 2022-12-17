@@ -3,6 +3,7 @@ using SketcherControl.Filling;
 using SurfaceFiller.Components;
 using SurfaceFiller.Samples;
 using System.Drawing.Imaging;
+using System.Numerics;
 using ToolbarControls;
 
 namespace SurfaceFiller
@@ -45,6 +46,11 @@ namespace SurfaceFiller
             this.toolbar.AddRadioOption(VectorInterpolationOptionHandler, Labels.VectorsInterpolationOption, Hints.VectorInterpolation);
             this.toolbar.EndSection();
             this.toolbar.AddDivider();
+            this.toolbar.AddSlider(FovSliderHandler, "FOV");
+            this.toolbar.AddSlider(CameraXHandler, "CameraX");
+            this.toolbar.AddSlider(CameraYHandler, "CameraY");
+            this.toolbar.AddSlider(CameraZHandler, "CameraZ");
+            this.toolbar.AddDivider();
             this.fillSection = this.toolbar.StartSection();
             this.toolbar.AddLabel(Labels.ModelParameters);
             this.toolbar.AddFractSlider(KDParameterHandler, Labels.KDParameter, Defaults.KDParameter);
@@ -68,7 +74,42 @@ namespace SurfaceFiller
             this.normalMapCombo = this.toolbar.AddComboImagePicker<Sample>(NormalMapPickedHandler);
             this.toolbar.AddButton(VectorMapHandler, Glyphs.File, Hints.LoadNormalMap);
             this.toolbar.EndSection();
-            this.fillSection.Enabled = false;
+            this.fillSection.Visible = false;
+        }
+
+        private void CameraZHandler(float obj)
+        {
+            this.sketcher.CameraVector = new Vector3()
+            {
+                X = this.sketcher.CameraVector.X,
+                Y = this.sketcher.CameraVector.Y,
+                Z = 1 + 5 * obj,
+            };
+        }
+
+        private void CameraYHandler(float obj)
+        {
+            this.sketcher.CameraVector = new Vector3()
+            {
+                X = this.sketcher.CameraVector.X,
+                Y = 1 + 5 * obj,
+                Z = this.sketcher.CameraVector.Z,
+            };
+        }
+
+        private void CameraXHandler(float obj)
+        {
+            this.sketcher.CameraVector = new Vector3()
+            {
+                X = 1 + 5 * obj,
+                Y = this.sketcher.CameraVector.Y,
+                Z = this.sketcher.CameraVector.Z,
+            };
+        }
+
+        private void FovSliderHandler(float obj)
+        {
+            this.sketcher.FOV = (float)(Math.PI / 6 + obj * Math.PI / 2);
         }
 
         private void ClearHandler(object? sender, EventArgs e)
@@ -99,7 +140,7 @@ namespace SurfaceFiller
         private void FillObjectsHandler(object? sender, EventArgs e)
         {
             this.sketcher.Fill = !this.sketcher.Fill;
-            this.fillSection.Enabled = this.sketcher.Fill;
+            this.fillSection.Visible = this.sketcher.Fill;
             this.sketcher.LightSource.Show = this.sketcher.Fill;
         }
 
