@@ -149,6 +149,12 @@ namespace SketcherControl.Filling
             return vector;
         }
 
+        public float InterpolateZ(Polygon polygon, int x, int y)
+        {
+            var coefficients = GetBarycentricCoefficients(polygon, x, y);
+            return InterpolateZ(polygon, coefficients);
+        }
+
         public void StartFillingTriangle(IEnumerable<Vertex> vertices)
         {
 
@@ -239,14 +245,14 @@ namespace SketcherControl.Filling
 
         private float InterpolateZ(Polygon polygon, float[] coefficients)
         {
-            return polygon.Vertices[0].Location.Z * coefficients[1] + polygon.Vertices[1].Location.Z * coefficients[2] + polygon.Vertices[2].Location.Z * coefficients[0];
+            return polygon.Vertices[0].RenderLocation.Z * coefficients[1] + polygon.Vertices[1].RenderLocation.Z * coefficients[2] + polygon.Vertices[2].RenderLocation.Z * coefficients[0];
         }
 
         private Color CalculateColorInPoint(Vector4 location, Vector4 normalVector, Vector4? textureColor = null)
         {
             Vector4 IL = LightSource.LightSourceVector;
             Vector4 IO = textureColor ?? TargetColor.ToVector();
-            Vector4 L = Vector4.Normalize(ScaleBack(LightSource.RenderLocation) - location);
+            Vector4 L = Vector4.Normalize(LightSource.SceneLocation - location);
             Vector4 R = 2 * Vector4.Dot(normalVector, L) * normalVector - L;
 
             var angleNL = Vector4.Dot(normalVector, L);

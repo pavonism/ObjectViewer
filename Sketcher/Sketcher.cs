@@ -39,6 +39,9 @@ namespace SketcherControl
         private int columnWidth;
         private int rowHeight;
 
+        private Matrix4x4 view;
+        private Matrix4x4 position;
+
         private float fov = (float)Math.PI / 6;
         public float FOV
         {
@@ -61,6 +64,7 @@ namespace SketcherControl
             {
                 if(this.cameraVector != value) 
                 {
+                    this.LightSource.SceneLocation = new Vector4(value, 0);
                     this.cameraVector = value;
                     TransformAndRefresh();
                 }
@@ -102,7 +106,7 @@ namespace SketcherControl
             ColorPicker.ParametersChanged += ParametersChangedHandler;
 
             this.rotationTimer = new();
-            this.rotationTimer.Interval = 40;
+            this.rotationTimer.Interval = 50;
             this.rotationTimer.Tick += RotationTimer_Tick;
             this.rotationTimer.Start();
         }
@@ -205,9 +209,12 @@ namespace SketcherControl
                 g.Clear(Color.White);
             }
 
+            if(Fill)
+                this.canvas.ClearZBuffer();
+
             foreach (var obj in this.objects)
             {
-                obj.Render(this.canvas, ShowLines, Fill ? ColorPicker : null);
+                obj.Render(this.canvas, this.view, ShowLines, Fill ? ColorPicker : null);
             }
 
             LightSource.Render(this.canvas);
@@ -262,10 +269,13 @@ namespace SketcherControl
 
         private void SetRenderScales()
         {
+            this.view = Matrix4x4.CreateLookAt(CameraVector, new Vector3(0, 0, 0), new Vector3(0, 0, 1));
+            this.position = Matrix4x4.CreatePerspectiveFieldOfView(fov, (float)this.canvas.Width / this.canvas.Height, 1, 50);
+
             for (int i = 0; i < this.objects.Count; i++)
             {
                 //var rect = new Rectangle(i % this.columns * this.columnWidth, i / this.columns * this.rowHeight, this.columnWidth, this.rowHeight);
-                this.objects[i].SetRenderScale(this.canvas.Width, this.canvas.Height, CameraVector, FOV, angleX, angleY);
+                this.objects[i].SetRenderScale(this.canvas.Width, this.canvas.Height, this.view, this.position);
             }
         }
 

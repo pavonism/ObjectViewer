@@ -46,7 +46,7 @@ namespace SurfaceFiller
             this.toolbar.AddRadioOption(VectorInterpolationOptionHandler, Labels.VectorsInterpolationOption, Hints.VectorInterpolation);
             this.toolbar.EndSection();
             this.toolbar.AddDivider();
-            this.toolbar.AddSlider(FovSliderHandler, "FOV");
+            this.toolbar.AddSlider(FovSliderHandler, "FOV", 0.5f);
             this.toolbar.AddSlider(CameraXHandler, "CameraX");
             this.toolbar.AddSlider(CameraYHandler, "CameraY");
             this.toolbar.AddSlider(CameraZHandler, "CameraZ");

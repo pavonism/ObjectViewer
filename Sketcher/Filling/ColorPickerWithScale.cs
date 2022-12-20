@@ -13,6 +13,7 @@ namespace SketcherControl.Filling
 
         public int Width { get; set; }
         public int Height { get; set; }
+        public override Color TargetColor { get; set; }
 
         public ColorPickerWithScale(ColorPicker colorPicker, Matrix4x4 transform, int width, int height) : base(colorPicker)
         {

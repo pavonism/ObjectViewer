@@ -1,4 +1,5 @@
 ﻿using SketcherControl.Shapes;
+using System.Runtime.CompilerServices;
 
 namespace SketcherControl.Filling
 {
@@ -22,7 +23,7 @@ namespace SketcherControl.Filling
             return sortedEdges;
         }
 
-        public static void Fill(Polygon polygon, DirectBitmap canvas, IColorPicker colorPicker)
+        public static void Fill(Polygon polygon, DirectBitmap canvas, IColorPicker colorPicker, Color color)
         {
             colorPicker.StartFillingTriangle(polygon.Vertices);
             polygon.GetMaxPoints(out var maxPoint, out var minPoint);
@@ -48,10 +49,17 @@ namespace SketcherControl.Filling
                 {
                     for (int xi = (int)AET[i - 1].DrawingX; xi <= AET[i].DrawingX; xi++)
                     {
-                        //var color = colorPicker.GetColor(polygon, xi, y + minPoint.Y);
-                        var color = SketcherConstants.ThemeColor;
-                        if (canvas.GetPixel(xi, y + minPoint.Y) != Color.Black)
-                            canvas.SetPixel(xi, y + minPoint.Y, color);
+                        var currentX = xi;
+                        var currentY = y + minPoint.Y;
+
+                        var interpolatedZ = colorPicker.InterpolateZ(polygon, currentX, currentY);
+
+                        var lightColor = colorPicker.GetColor(polygon, xi, y + minPoint.Y);
+                        if (interpolatedZ <= canvas.GetZ(currentX, currentY))
+                        {
+                            canvas.SetZ(currentX, currentY, interpolatedZ);
+                            canvas.SetPixel(currentX, currentY, lightColor);
+                        }
                     }
                 }
 

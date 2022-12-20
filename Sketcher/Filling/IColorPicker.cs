@@ -11,5 +11,6 @@ namespace SketcherControl.Filling
     {
         void StartFillingTriangle(IEnumerable<Vertex> vertices);
         public Color GetColor(Polygon polygon, int x, int y);
+        float InterpolateZ(Polygon polygon, int x, int y);
     }
 }

@@ -30,7 +30,7 @@ namespace SketcherControl.Filling
         #region Properties
         public float MinZ { get; set; } = 1f;
         public Vector4 RenderLocation => new Vector4(xSun, Renderer.Size.Height - ySun, MinZ + 3 * MinZ * lightLocationZ, 1);
-
+        public Vector4 SceneLocation { get; set; }
         public bool Show { get; set; }
 
         public bool ShowTrack
@@ -215,7 +215,7 @@ namespace SketcherControl.Filling
 
         public void RecalculateLightCoordinates()
         {
-            xSun =  (int)(Math.Cos(lightAngle) * this.lightAngle) + (int)(Renderer.Size.Width * LightLocationX);
+            xSun = (int)(Math.Cos(lightAngle) * this.lightAngle) + (int)(Renderer.Size.Width * LightLocationX);
             ySun = (int)(Math.Sin(lightAngle) * this.lightAngle) + (int)(Renderer.Size.Height * LightLocationY);
 
             if (xSun <= 0 || xSun >= Renderer.Size.Width || ySun <= 0 || ySun >= Renderer.Size.Height)

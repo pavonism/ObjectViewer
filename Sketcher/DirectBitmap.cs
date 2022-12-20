@@ -7,6 +7,7 @@ namespace SketcherControl
     {
         public Bitmap Bitmap { get; private set; }
         public Int32[] Bits { get; private set; }
+        public float[] ZBuffer { get; set; }
         public bool Disposed { get; private set; }
         public int Height { get; private set; }
         public int Width { get; private set; }
@@ -18,6 +19,7 @@ namespace SketcherControl
             Width = width;
             Height = height;
             Bits = new Int32[width * height];
+            ZBuffer = new float[width * height];
             BitsHandle = GCHandle.Alloc(Bits, GCHandleType.Pinned);
             Bitmap = new Bitmap(width, height, width * 4, PixelFormat.Format32bppPArgb, BitsHandle.AddrOfPinnedObject());
         }
@@ -66,6 +68,29 @@ namespace SketcherControl
                     SetPixel(i, bitmap.Height - j, bitmap.GetPixel(i, j));
                 }
             }
+        }
+
+        public void ClearZBuffer()
+        {
+            Array.Fill(ZBuffer, float.MaxValue);
+        }
+
+        public void SetZ(int x, int y, float z)
+        {
+            int index = x + ((Height - y) * Width);
+
+            if (index < Bits.Length && index >= 0)
+                ZBuffer[index] = z;
+        }
+
+        public double GetZ(int x, int y)
+        {
+            int index = x + ((Height - y) * Width);
+
+            if (index < Bits.Length && index >= 0)
+                return ZBuffer[index];
+
+            return double.MaxValue;
         }
 
         public void Dispose()

@@ -13,8 +13,8 @@ namespace SketcherControl.Shapes
         private float rotationY;
 
         private Matrix4x4 model;
-        private Matrix4x4 view;
-        private Matrix4x4 position;
+
+        private Color color;
 
         public SizeF ObjectSize { get; private set; }
 
@@ -23,20 +23,26 @@ namespace SketcherControl.Shapes
             this.triangles = triangles;
             ObjectSize = objectSize;
             this.objectIndx = objectIndx;
+
+            if (this.objectIndx % 2 == 0)
+                this.color = SketcherConstants.ThemeColor;
+            else
+                this.color = Color.MediumPurple;
         }
 
-        public void Render(DirectBitmap bitmap, bool showLines = true, ColorPicker? colorPicker = null)
+        public void Render(DirectBitmap bitmap, Matrix4x4 position, bool showLines = true, ColorPicker? colorPicker = null)
         {
 
             if(colorPicker != null)
             {
-                var colorPickerWithScale = new ColorPickerWithScale(colorPicker, model * view * position, bitmap.Width, bitmap.Height);
+                var colorPickerWithScale = new ColorPickerWithScale(colorPicker, position, bitmap.Width, bitmap.Height);
+                colorPickerWithScale.TargetColor = this.color;
 
                 if (RenderThreads == 1)
                 {
                     foreach (var triangle in this.triangles)
                     {
-                        ScanLine.Fill(triangle, bitmap, colorPickerWithScale);
+                        ScanLine.Fill(triangle, bitmap, colorPickerWithScale, this.color);
                     }
                 }
                 else
@@ -70,27 +76,25 @@ namespace SketcherControl.Shapes
                     for (int j = start; j < start + step && j < this.triangles.Count; j++)
                     {
                         if (this.triangles[j].IsVisible(bitmap.Width, bitmap.Height))
-                            ScanLine.Fill(this.triangles[j], bitmap, colorPicker);
+                            ScanLine.Fill(this.triangles[j], bitmap, colorPicker, this.color);
                     }
                 });
         }
 
-        public void SetRenderScale(int width, int height, Vector3 cameraPosition, float fov, float angleX, float angleY)
+        public void SetRenderScale(int width, int height, Matrix4x4 view, Matrix4x4 position)
         {
             if (this.objectIndx % 2 == 0)
-                this.rotationX -= 2 * (float)Math.PI / height;
+                this.rotationX += 2 * 2 * (float)Math.PI / height;
             else
-                this.rotationX += 2 * (float)Math.PI / width;
+                this.rotationY += 2 * 2 * (float)Math.PI / width;
 
             var rotationX = Matrix4x4.CreateRotationX(this.rotationX);
             var rotationY = Matrix4x4.CreateRotationY(this.rotationY);
             this.model = rotationX * rotationY;
-            this.view = Matrix4x4.CreateLookAt(cameraPosition, new Vector3(0, 0, 0), new Vector3(0, 0, 1));
-            this.position = Matrix4x4.CreatePerspectiveFieldOfView(fov, (float)width / height, 1, 50);
 
             foreach (var triangle in triangles)
             {
-                triangle.SetRenderScale(width, height, this.model, this.view, this.position);
+                triangle.SetRenderScale(width, height, this.model, view, position);
             }
         }
     }
