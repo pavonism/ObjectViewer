@@ -28,9 +28,10 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Properties
-        public float MinZ { get; set; } = 1f;
-        public Vector4 RenderLocation => new Vector4(xSun, Renderer.Size.Height - ySun, MinZ + 3 * MinZ * lightLocationZ, 1);
-        public Vector4 SceneLocation { get; set; }
+        public float MinZ { get; set; } = 0;
+        public Vector4 RenderLocation => new Vector4(xSun, Renderer.Size.Height - ySun, MinZ + Math.Min(Renderer.Size.Height, Renderer.Size.Width) * lightLocationZ, 0);
+
+        public Vector4 SceneLocation { get; set; } = new Vector4(0, 2, 2, 0);
         public bool Show { get; set; }
 
         public bool ShowTrack

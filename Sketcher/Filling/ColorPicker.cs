@@ -139,12 +139,12 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Logic
-        public virtual Vector4 Scale(Vector4 vector)
+        public virtual Vector4 Transform(Vector4 vector)
         {
             return vector;
         }
 
-        public virtual Vector4 ScaleBack(Vector4 vector)
+        public virtual Vector4 TransformBack(Vector4 vector)
         {
             return vector;
         }
@@ -164,8 +164,8 @@ namespace SketcherControl.Filling
                     foreach (var vertex in vertices)
                     {
                         var textureColor = Pattern?.GetPixel(((int)vertex.RenderLocation.X + Pattern.Width / 2) % Pattern.Width, ((int)vertex.RenderLocation.Y + Pattern.Height / 2) % Pattern.Height).ToVector();
-                        var normalVector = NormalMap != null ? GetNormalVectorFromNormalMap((int)vertex.RenderLocation.X, (int)vertex.RenderLocation.Y, vertex.NormalVector) : vertex.NormalVector;
-                        vertex.Color = CalculateColorInPoint(vertex.Location, normalVector, textureColor);
+                        var normalVector = NormalMap != null ? GetNormalVectorFromNormalMap((int)vertex.RenderLocation.X, (int)vertex.RenderLocation.Y, vertex.NormalVector) : vertex.GlobalNormalVector;
+                        vertex.Color = CalculateColorInPoint(vertex.GlobalLocation, normalVector, textureColor);
                     }
                     break;
                 case Interpolation.NormalVector:
@@ -213,7 +213,7 @@ namespace SketcherControl.Filling
             var textureColor = GetTextureColor(x, y);
             var z = InterpolateZ(polygon, coefficients);
             var renderLocation = new Vector4(x, y, z, 0);
-            return CalculateColorInPoint(ScaleBack(renderLocation), normalVector, textureColor);
+            return CalculateColorInPoint(TransformBack(renderLocation), normalVector, textureColor);
         }
 
         private float[] GetBarycentricCoefficients(Polygon polygon, int x, int y)
@@ -294,9 +294,9 @@ namespace SketcherControl.Filling
 
         private Vector4 InterpolateNormalVector(Polygon polygon, float[] coefficients)
         {
-            var xn = polygon.Vertices[0].NormalVector.X * coefficients[1] + polygon.Vertices[1].NormalVector.X * coefficients[2] + polygon.Vertices[2].NormalVector.X * coefficients[0];
-            var yn = polygon.Vertices[0].NormalVector.Y * coefficients[1] + polygon.Vertices[1].NormalVector.Y * coefficients[2] + polygon.Vertices[2].NormalVector.Y * coefficients[0];
-            var zn = polygon.Vertices[0].NormalVector.Z * coefficients[1] + polygon.Vertices[1].NormalVector.Z * coefficients[2] + polygon.Vertices[2].NormalVector.Z * coefficients[0];
+            var xn = polygon.Vertices[0].GlobalNormalVector.X * coefficients[1] + polygon.Vertices[1].GlobalNormalVector.X * coefficients[2] + polygon.Vertices[2].GlobalNormalVector.X * coefficients[0];
+            var yn = polygon.Vertices[0].GlobalNormalVector.Y * coefficients[1] + polygon.Vertices[1].GlobalNormalVector.Y * coefficients[2] + polygon.Vertices[2].GlobalNormalVector.Y * coefficients[0];
+            var zn = polygon.Vertices[0].GlobalNormalVector.Z * coefficients[1] + polygon.Vertices[1].GlobalNormalVector.Z * coefficients[2] + polygon.Vertices[2].GlobalNormalVector.Z * coefficients[0];
 
             return Vector4.Normalize(new Vector4(xn, yn, zn, 0));
         }

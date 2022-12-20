@@ -39,14 +39,14 @@ namespace SurfaceFiller
             this.toolbar.AddButton(ClearHandler, Glyphs.Reset);
             //this.toolbar.AddSlider(ThreadsSlidrerHandler, Labels.ThreadSlider, Defaults.ThreadsCount);
             this.toolbar.AddDivider();
-            this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, true);
-            this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, false);
+            this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, false);
+            this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, true);
             this.toolbar.StartSection();
             this.toolbar.AddRadioOption(ColorInterpolationOptionHandler, Labels.ColorInterpolationOption, Hints.ColorInterpolation, true);
             this.toolbar.AddRadioOption(VectorInterpolationOptionHandler, Labels.VectorsInterpolationOption, Hints.VectorInterpolation);
             this.toolbar.EndSection();
             this.toolbar.AddDivider();
-            this.toolbar.AddSlider(FovSliderHandler, "FOV", 0.5f);
+            this.toolbar.AddSlider(FovSliderHandler, "FOV", 0.35f);
             this.toolbar.AddSlider(CameraXHandler, "CameraX");
             this.toolbar.AddSlider(CameraYHandler, "CameraY");
             this.toolbar.AddSlider(CameraZHandler, "CameraZ");
@@ -140,8 +140,8 @@ namespace SurfaceFiller
         private void FillObjectsHandler(object? sender, EventArgs e)
         {
             this.sketcher.Fill = !this.sketcher.Fill;
-            this.fillSection.Visible = this.sketcher.Fill;
-            this.sketcher.LightSource.Show = this.sketcher.Fill;
+            //this.fillSection.Visible = this.sketcher.Fill;
+            //this.sketcher.LightSource.Show = this.sketcher.Fill;
         }
 
         private void VectorInterpolationOptionHandler(object? sender, EventArgs e)

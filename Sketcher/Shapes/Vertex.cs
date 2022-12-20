@@ -6,8 +6,9 @@ namespace SketcherControl.Shapes
     {
         public Vector4 Location;
         public Vector4 NormalVector { get; set; }
+        public Vector4 GlobalNormalVector;
         public Vector4 RenderLocation;
-
+        public Vector4 GlobalLocation;
         public Color Color { get; set; }
 
         public event Action? RenderCoordinatesChanged;
@@ -25,14 +26,17 @@ namespace SketcherControl.Shapes
         public void Transform(int width, int height, Matrix4x4 model, Matrix4x4 view, Matrix4x4 position)
         {
             Location.W = 1;
-            RenderLocation = Vector4.Transform(Location, model * view * position);
+            var globalNormal = Vector3.TransformNormal(new Vector3(NormalVector.X, NormalVector.Y, NormalVector.Z), model);
+            GlobalNormalVector = new Vector4(globalNormal, 0);
+            GlobalLocation = Vector4.Transform(Location, model);
+            RenderLocation = Vector4.Transform(GlobalLocation, view * position);
             RenderLocation /= RenderLocation.W;
             RenderLocation.X *= width / 2;
             RenderLocation.Y *= height / 2;
             RenderLocation.X += width / 2;
             RenderLocation.Y += height / 2;
             Location.W = 0;
-
+            GlobalLocation.W = 0;
             RenderCoordinatesChanged?.Invoke();
         }
 

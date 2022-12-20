@@ -64,7 +64,7 @@ namespace SketcherControl
             {
                 if(this.cameraVector != value) 
                 {
-                    this.LightSource.SceneLocation = new Vector4(value, 0);
+                    //this.LightSource.SceneLocation = new Vector4(value, 0);
                     this.cameraVector = value;
                     TransformAndRefresh();
                 }
@@ -106,7 +106,7 @@ namespace SketcherControl
             ColorPicker.ParametersChanged += ParametersChangedHandler;
 
             this.rotationTimer = new();
-            this.rotationTimer.Interval = 50;
+            this.rotationTimer.Interval = 40;
             this.rotationTimer.Tick += RotationTimer_Tick;
             this.rotationTimer.Start();
         }
@@ -214,7 +214,7 @@ namespace SketcherControl
 
             foreach (var obj in this.objects)
             {
-                obj.Render(this.canvas, this.view, ShowLines, Fill ? ColorPicker : null);
+                obj.Render(this.canvas, this.view * this.position, CameraVector, ShowLines, Fill ? ColorPicker : null);
             }
 
             LightSource.Render(this.canvas);

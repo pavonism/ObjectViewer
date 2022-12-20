@@ -54,9 +54,9 @@ namespace SketcherControl.Shapes
             NormalVectorsCache.Clear();
         }
 
-        public void Render(DirectBitmap canvas)
+        public void Render(DirectBitmap canvas, Vector3 lookVector)
         {
-            if (!IsVisible(canvas.Width, canvas.Height))
+            if (!IsVisible(canvas.Width, canvas.Height, lookVector))
                 return;
 
             foreach (var vertex in Vertices)
@@ -70,10 +70,22 @@ namespace SketcherControl.Shapes
             }
         }
 
-        public bool IsVisible(int width, int height)
+        public bool IsVisible(int width, int height, Vector3 lookVector)
         {
             GetMaxPoints(out var max, out var min);
-            return max.X < width && max.Y < height && min.X >= 0 && min.Y >= 0;
+            bool inView = max.X < width && max.Y < height && min.X >= 0 && min.Y >= 0;
+
+            bool visible = false;
+            foreach (var vertex in Vertices)
+            {
+                if (Vector4.Dot(vertex.GlobalNormalVector, new Vector4(lookVector, 0)) < 0)
+                {
+                    visible = true;
+                    break;
+                }
+            }
+
+            return inView && visible;
         }
     }
 }

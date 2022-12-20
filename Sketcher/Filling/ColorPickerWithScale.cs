@@ -23,7 +23,7 @@ namespace SketcherControl.Filling
             Matrix4x4.Invert(this.transform, out this.invertTransform);
         }
 
-        public override Vector4 Scale(Vector4 vector)
+        public override Vector4 Transform(Vector4 vector)
         {
             var renderLocation = vector;
 
@@ -39,7 +39,7 @@ namespace SketcherControl.Filling
             return renderLocation;
         }
 
-        public override Vector4 ScaleBack(Vector4 vector)
+        public override Vector4 TransformBack(Vector4 vector)
         {
             var modelLocation = vector;
             modelLocation.Y -= Height / 2;
@@ -48,7 +48,7 @@ namespace SketcherControl.Filling
             modelLocation.X /= Width / 2;
 
             modelLocation.W = 1;
-            modelLocation = Vector4.Transform(modelLocation, transform);
+            modelLocation = Vector4.Transform(modelLocation, this.invertTransform);
             modelLocation /= modelLocation.W;
             modelLocation.W = 0;
 

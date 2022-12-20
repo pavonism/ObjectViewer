@@ -7,7 +7,7 @@ namespace SketcherControl.Shapes
     public class Object3
     {
         private int objectIndx;
-        private int RenderThreads = 50;
+        private int RenderThreads = 100;
         private readonly List<Triangle> triangles = new();
         private float rotationX;
         private float rotationY;
@@ -30,8 +30,9 @@ namespace SketcherControl.Shapes
                 this.color = Color.MediumPurple;
         }
 
-        public void Render(DirectBitmap bitmap, Matrix4x4 position, bool showLines = true, ColorPicker? colorPicker = null)
+        public void Render(DirectBitmap bitmap, Matrix4x4 position, Vector3 cameraPosition, bool showLines = true, ColorPicker? colorPicker = null)
         {
+            Vector3 lookVector = -cameraPosition;
 
             if(colorPicker != null)
             {
@@ -52,7 +53,7 @@ namespace SketcherControl.Shapes
 
                     for (int i = 0; i < RenderThreads; i++)
                     {
-                        tasks.Add(FillAsync(bitmap, colorPickerWithScale, i * trianglesPerThread, trianglesPerThread));
+                        tasks.Add(FillAsync(bitmap, colorPickerWithScale, i * trianglesPerThread, trianglesPerThread, lookVector));
                     }
 
                     Task.WaitAll(tasks.ToArray());
@@ -63,19 +64,19 @@ namespace SketcherControl.Shapes
             {
                 foreach (var triangle in triangles)
                 {
-                    triangle.Render(bitmap);
+                    triangle.Render(bitmap, lookVector);
                 }
             }
         }
 
-        private Task FillAsync(DirectBitmap bitmap, ColorPicker colorPicker, int start, int step)
+        private Task FillAsync(DirectBitmap bitmap, ColorPicker colorPicker, int start, int step, Vector3 lookVector)
         {
             return Task.Run(
                 () =>
                 {
                     for (int j = start; j < start + step && j < this.triangles.Count; j++)
                     {
-                        if (this.triangles[j].IsVisible(bitmap.Width, bitmap.Height))
+                        if (this.triangles[j].IsVisible(bitmap.Width, bitmap.Height, lookVector))
                             ScanLine.Fill(this.triangles[j], bitmap, colorPicker, this.color);
                     }
                 });

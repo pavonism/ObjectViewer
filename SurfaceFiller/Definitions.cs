@@ -11,7 +11,7 @@ namespace SurfaceFiller
         public const float MParameter = 0.5f;
 
         public const float AnimationSpeed = 0.1f;
-        public const float LightLocationZ = 0.2f;
+        public const float LightLocationZ = 0.5f;
     }
 
     public static class Resources
@@ -32,7 +32,7 @@ namespace SurfaceFiller
         public const int MinimumWindowSizeY = 800;
 
         public const int InitialWindowSizeX = 900;
-        public const int InitialWindowSizeY = 800;
+        public const int InitialWindowSizeY = 700;
 
         public const int MainFormColumnCount = 2;
         public const int MinimumControlSize = 32;
