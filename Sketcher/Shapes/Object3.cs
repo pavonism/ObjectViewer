@@ -30,14 +30,13 @@ namespace SketcherControl.Shapes
                 this.color = Color.MediumPurple;
         }
 
-        public void Render(DirectBitmap bitmap, Matrix4x4 position, Vector3 cameraPosition, bool showLines = true, ColorPicker? colorPicker = null)
+        public void Render(DirectBitmap bitmap, Vector3 cameraPosition, bool showLines = true, ColorPicker? colorPicker = null)
         {
             Vector3 lookVector = -cameraPosition;
 
             if(colorPicker != null)
             {
-                var colorPickerWithScale = new ColorPickerWithScale(colorPicker, position, bitmap.Width, bitmap.Height);
-                colorPickerWithScale.TargetColor = this.color;
+                var colorPickerWithScale = new TargetColorColorPickerDecorator(colorPicker, this.color);
 
                 if (RenderThreads == 1)
                 {

@@ -139,16 +139,6 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Logic
-        public virtual Vector4 Transform(Vector4 vector)
-        {
-            return vector;
-        }
-
-        public virtual Vector4 TransformBack(Vector4 vector)
-        {
-            return vector;
-        }
-
         public float InterpolateZ(Polygon polygon, int x, int y)
         {
             var coefficients = GetBarycentricCoefficients(polygon, x, y);
@@ -211,9 +201,11 @@ namespace SketcherControl.Filling
             var coefficients = GetBarycentricCoefficients(polygon, x, y);
             var normalVector = GetNormalVector(polygon, x, y, coefficients);
             var textureColor = GetTextureColor(x, y);
-            var z = InterpolateZ(polygon, coefficients);
-            var renderLocation = new Vector4(x, y, z, 0);
-            return CalculateColorInPoint(TransformBack(renderLocation), normalVector, textureColor);
+            var xi = InterpolateX(polygon, coefficients);
+            var yi = InterpolateY(polygon, coefficients);
+            var zi = InterpolateZ(polygon, coefficients);
+            var renderLocation = new Vector4(xi, yi, zi, 0);
+            return CalculateColorInPoint(renderLocation, normalVector, textureColor);
         }
 
         private float[] GetBarycentricCoefficients(Polygon polygon, int x, int y)
@@ -246,6 +238,16 @@ namespace SketcherControl.Filling
         private float InterpolateZ(Polygon polygon, float[] coefficients)
         {
             return polygon.Vertices[0].RenderLocation.Z * coefficients[1] + polygon.Vertices[1].RenderLocation.Z * coefficients[2] + polygon.Vertices[2].RenderLocation.Z * coefficients[0];
+        }
+
+        private float InterpolateX(Polygon polygon, float[] coefficients)
+        {
+            return polygon.Vertices[0].RenderLocation.X * coefficients[1] + polygon.Vertices[1].RenderLocation.X * coefficients[2] + polygon.Vertices[2].RenderLocation.X * coefficients[0];
+        }
+
+        private float InterpolateY(Polygon polygon, float[] coefficients)
+        {
+            return polygon.Vertices[0].RenderLocation.Y * coefficients[1] + polygon.Vertices[1].RenderLocation.Y * coefficients[2] + polygon.Vertices[2].RenderLocation.Y * coefficients[0];
         }
 
         private Color CalculateColorInPoint(Vector4 location, Vector4 normalVector, Vector4? textureColor = null)

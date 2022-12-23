@@ -64,7 +64,6 @@ namespace SketcherControl
             {
                 if(this.cameraVector != value) 
                 {
-                    //this.LightSource.SceneLocation = new Vector4(value, 0);
                     this.cameraVector = value;
                     TransformAndRefresh();
                 }
@@ -214,7 +213,7 @@ namespace SketcherControl
 
             foreach (var obj in this.objects)
             {
-                obj.Render(this.canvas, this.view * this.position, CameraVector, ShowLines, Fill ? ColorPicker : null);
+                obj.Render(this.canvas, CameraVector, ShowLines, Fill ? ColorPicker : null);
             }
 
             LightSource.Render(this.canvas);

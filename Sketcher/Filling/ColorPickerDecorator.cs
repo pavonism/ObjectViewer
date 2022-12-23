@@ -19,15 +19,5 @@ namespace SketcherControl.Filling
         public override DirectBitmap? Pattern { get => _colorPicker.Pattern; set => _colorPicker.Pattern = value; }
         public override DirectBitmap? NormalMap { get => _colorPicker.NormalMap; set => _colorPicker.NormalMap = value; }
         public override LightSource LightSource { get => _colorPicker.LightSource; set =>_colorPicker.LightSource = value; }
-
-        public override Vector4 Transform(Vector4 vector)
-        {
-            return _colorPicker.Transform(vector);
-        }
-
-        public override Vector4 TransformBack(Vector4 vector)
-        {
-            return _colorPicker.TransformBack(vector);
-        }
     }
 }
