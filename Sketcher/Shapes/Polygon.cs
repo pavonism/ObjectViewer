@@ -11,7 +11,7 @@ namespace SketcherControl.Shapes
         public int EdgesCount => this.edges.Count;
         public IEnumerable<Edge> Edges => this.edges;
 
-        public readonly Dictionary<(int, int), float[]> CoefficientsCache = new();
+        public readonly Dictionary<(int, int), Vector3> CoefficientsCache = new();
         public readonly Dictionary<(int, int), Vector4> NormalVectorsCache = new();
 
         public virtual void GetMaxPoints(out Point max, out Point min)

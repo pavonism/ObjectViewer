@@ -15,6 +15,7 @@ namespace SketcherControl.Filling
         private float kS = 0.5f;
         private int m = 4;
         private LightSource lightSource;
+        private Interpolator interpolator = new();
         private Vector4 v = new(0, 0, 1, 0);
         private DirectBitmap? texture;
         private DirectBitmap? normalMap;
@@ -182,18 +183,18 @@ namespace SketcherControl.Filling
         private Color GetColorWithColorInterpolation(Polygon polygon, int x, int y)
         {
             var coefficients = GetBarycentricCoefficients(polygon, x, y);
-            var rc = polygon.Vertices[0].Color.R * coefficients[1] / 255 + polygon.Vertices[1].Color.R * coefficients[2] / 255 + polygon.Vertices[2].Color.R * coefficients[0] / 255;
-            var gc = polygon.Vertices[0].Color.G * coefficients[1] / 255 + polygon.Vertices[1].Color.G * coefficients[2] / 255 + polygon.Vertices[2].Color.G * coefficients[0] / 255;
-            var bc = polygon.Vertices[0].Color.B * coefficients[1] / 255 + polygon.Vertices[1].Color.B * coefficients[2] / 255 + polygon.Vertices[2].Color.B * coefficients[0] / 255;
+            var rc = polygon.Vertices[0].Color.R * coefficients.Y + polygon.Vertices[1].Color.R * coefficients.Z + polygon.Vertices[2].Color.R * coefficients.X;
+            var gc = polygon.Vertices[0].Color.G * coefficients.Y + polygon.Vertices[1].Color.G * coefficients.Z + polygon.Vertices[2].Color.G * coefficients.X;
+            var bc = polygon.Vertices[0].Color.B * coefficients.Y + polygon.Vertices[1].Color.B * coefficients.Z + polygon.Vertices[2].Color.B * coefficients.X;
 
             if (rc < 0) rc = 0;
-            if (rc > 1) rc = 1;
+            if (rc > 255) rc = 255;
             if (gc < 0) gc = 0;
-            if (gc > 1) gc = 1;
+            if (gc > 255) gc = 255;
             if (bc < 0) bc = 0;
-            if (bc > 1) bc = 1;
+            if (bc > 255) bc = 255;
 
-            return Color.FromArgb((int)(rc * 255), (int)(gc * 255), (int)(bc * 255));
+            return Color.FromArgb((int)rc, (int)gc, (int)bc);
         }
 
         private Color GetColorWithVectorInterpolation(Polygon polygon, int x, int y)
@@ -208,19 +209,19 @@ namespace SketcherControl.Filling
             return CalculateColorInPoint(renderLocation, normalVector, textureColor);
         }
 
-        private float[] GetBarycentricCoefficients(Polygon polygon, int x, int y)
+        private Vector3 GetBarycentricCoefficients(Polygon polygon, int x, int y)
         {
-            float[]? coefficients;
+            Vector3 coefficients;
 
             if (!polygon.CoefficientsCache.TryGetValue((x, y), out coefficients))
             {
-                coefficients = CalculateCoefficients(polygon, x, y);
+                coefficients = this.interpolator.CalculateCoefficients(polygon, x, y);
             }
 
             return coefficients;
         }
 
-        private Vector4 GetNormalVector(Polygon polygon, int x, int y, float[] coefficients)
+        private Vector4 GetNormalVector(Polygon polygon, int x, int y, Vector3 coefficients)
         {
             var normalVector = GetNormalVectorFromInterpolation(polygon, x, y, coefficients);
 
@@ -235,19 +236,19 @@ namespace SketcherControl.Filling
             return Pattern?.GetPixel(x % Pattern.Width, y % Pattern.Height).ToVector();
         }
 
-        private float InterpolateZ(Polygon polygon, float[] coefficients)
+        private float InterpolateZ(Polygon polygon, Vector3 coefficients)
         {
-            return polygon.Vertices[0].RenderLocation.Z * coefficients[1] + polygon.Vertices[1].RenderLocation.Z * coefficients[2] + polygon.Vertices[2].RenderLocation.Z * coefficients[0];
+            return polygon.Vertices[0].RenderLocation.Z * coefficients.Y + polygon.Vertices[1].RenderLocation.Z * coefficients.Z + polygon.Vertices[2].RenderLocation.Z * coefficients.X;
         }
 
-        private float InterpolateX(Polygon polygon, float[] coefficients)
+        private float InterpolateX(Polygon polygon, Vector3 coefficients)
         {
-            return polygon.Vertices[0].RenderLocation.X * coefficients[1] + polygon.Vertices[1].RenderLocation.X * coefficients[2] + polygon.Vertices[2].RenderLocation.X * coefficients[0];
+            return polygon.Vertices[0].GlobalLocation.X * coefficients.Y + polygon.Vertices[1].GlobalLocation.X * coefficients.Z + polygon.Vertices[2].GlobalLocation.X * coefficients.X;
         }
 
-        private float InterpolateY(Polygon polygon, float[] coefficients)
+        private float InterpolateY(Polygon polygon, Vector3 coefficients)
         {
-            return polygon.Vertices[0].RenderLocation.Y * coefficients[1] + polygon.Vertices[1].RenderLocation.Y * coefficients[2] + polygon.Vertices[2].RenderLocation.Y * coefficients[0];
+            return polygon.Vertices[0].GlobalLocation.Y * coefficients.Y + polygon.Vertices[1].GlobalLocation.Y * coefficients.Z + polygon.Vertices[2].GlobalLocation.Y * coefficients.X;
         }
 
         private Color CalculateColorInPoint(Vector4 location, Vector4 normalVector, Vector4? textureColor = null)
@@ -281,7 +282,7 @@ namespace SketcherControl.Filling
             };
         }
 
-        private Vector4 GetNormalVectorFromInterpolation(Polygon polygon, int x, int y, float[] coefficients)
+        private Vector4 GetNormalVectorFromInterpolation(Polygon polygon, int x, int y, Vector3 coefficients)
         {
             Vector4 normalVector;
 
@@ -294,41 +295,13 @@ namespace SketcherControl.Filling
             return normalVector;
         }
 
-        private Vector4 InterpolateNormalVector(Polygon polygon, float[] coefficients)
+        private Vector4 InterpolateNormalVector(Polygon polygon, Vector3 coefficients)
         {
-            var xn = polygon.Vertices[0].GlobalNormalVector.X * coefficients[1] + polygon.Vertices[1].GlobalNormalVector.X * coefficients[2] + polygon.Vertices[2].GlobalNormalVector.X * coefficients[0];
-            var yn = polygon.Vertices[0].GlobalNormalVector.Y * coefficients[1] + polygon.Vertices[1].GlobalNormalVector.Y * coefficients[2] + polygon.Vertices[2].GlobalNormalVector.Y * coefficients[0];
-            var zn = polygon.Vertices[0].GlobalNormalVector.Z * coefficients[1] + polygon.Vertices[1].GlobalNormalVector.Z * coefficients[2] + polygon.Vertices[2].GlobalNormalVector.Z * coefficients[0];
+            var xn = polygon.Vertices[0].GlobalNormalVector.X * coefficients.Y + polygon.Vertices[1].GlobalNormalVector.X * coefficients.Z + polygon.Vertices[2].GlobalNormalVector.X * coefficients.X;
+            var yn = polygon.Vertices[0].GlobalNormalVector.Y * coefficients.Y + polygon.Vertices[1].GlobalNormalVector.Y * coefficients.Z + polygon.Vertices[2].GlobalNormalVector.Y * coefficients.X;
+            var zn = polygon.Vertices[0].GlobalNormalVector.Z * coefficients.Y + polygon.Vertices[1].GlobalNormalVector.Z * coefficients.Z + polygon.Vertices[2].GlobalNormalVector.Z * coefficients.X;
 
             return Vector4.Normalize(new Vector4(xn, yn, zn, 0));
-        }
-
-        private float[] CalculateCoefficients(Polygon polygon, int x, int y)
-        {
-            var pixelLocation = new Vector4(x, y, 0, 0);
-            var coefficients = new float[polygon.VertexCount];
-            var areas = new float[polygon.VertexCount];
-            float sum = 0;
-
-            for (int i = 0; i < polygon.Vertices.Length; i++)
-            {
-                var xBA = polygon.Vertices[i].RenderLocation.X - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.X;
-                var yCA = pixelLocation.Y - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.Y;
-                var yBA = polygon.Vertices[i].RenderLocation.Y - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.Y;
-                var xCA = pixelLocation.X - polygon.Vertices[(i + 1) % polygon.VertexCount].RenderLocation.X;
-                var area = 0.5f * Math.Abs(xBA * yCA - yBA * xCA);
-
-                sum += area;
-                areas[i] = area;
-            }
-
-            for (int i = 0; i < polygon.Vertices.Length; i++)
-            {
-                coefficients[i] = areas[i] / sum;
-            }
-
-            polygon.CoefficientsCache.Add((x, y), coefficients);
-            return coefficients;
         }
         #endregion Logic
     }

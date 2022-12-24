@@ -13,6 +13,7 @@ namespace SketcherControl
         public int Width { get; private set; }
 
         protected GCHandle BitsHandle { get; private set; }
+        protected GCHandle ZBufferHandler { get; private set; }
 
         private void InitializeBitmap(int width, int height)
         {
@@ -22,6 +23,7 @@ namespace SketcherControl
             ZBuffer = new float[width * height];
             BitsHandle = GCHandle.Alloc(Bits, GCHandleType.Pinned);
             Bitmap = new Bitmap(width, height, width * 4, PixelFormat.Format32bppPArgb, BitsHandle.AddrOfPinnedObject());
+            ClearZBuffer();
         }
 
         public DirectBitmap(Bitmap bitmap) : this(bitmap.Width, bitmap.Height)
@@ -79,18 +81,18 @@ namespace SketcherControl
         {
             int index = x + ((Height - y) * Width);
 
-            if (index < Bits.Length && index >= 0)
+            if (index < ZBuffer.Length && index >= 0)
                 ZBuffer[index] = z;
         }
 
-        public double GetZ(int x, int y)
+        public float GetZ(int x, int y)
         {
             int index = x + ((Height - y) * Width);
 
             if (index < Bits.Length && index >= 0)
                 return ZBuffer[index];
 
-            return double.MaxValue;
+            return float.MaxValue;
         }
 
         public void Dispose()

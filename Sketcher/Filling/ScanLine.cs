@@ -1,8 +1,56 @@
-﻿using SketcherControl.Shapes;
-using System.Runtime.CompilerServices;
+﻿using SketcherControl.Geometrics;
+using SketcherControl.Shapes;
 
 namespace SketcherControl.Filling
 {
+    public interface IPixelProcessor
+    {
+        void StartProcessing(Polygon polygon);
+        void Process(Polygon polygon, int x, int y);
+    }
+
+    public class BarycentricProcessor : IPixelProcessor
+    {
+        private Interpolator interpolator = new();
+
+        public void Process(Polygon polygon, int x, int y)
+        {
+            interpolator.CalculateCoefficients(polygon, x, y);
+        }
+
+        public void StartProcessing(Polygon polygon)
+        {
+        }
+    }
+
+    public class PixelPainter : IPixelProcessor
+    {
+        DirectBitmap bitmap;
+        IColorPicker colorPicker;
+
+        public PixelPainter(DirectBitmap bitmap, ColorPicker colorPicker)
+        {
+            this.bitmap = bitmap;
+            this.colorPicker = colorPicker;
+        }
+
+        public void StartProcessing(Polygon polygon)
+        {
+            colorPicker.StartFillingTriangle(polygon.Vertices);
+        }
+
+        public void Process(Polygon polygon, int x, int y)
+        {
+            var interpolatedZ = colorPicker.InterpolateZ(polygon, x, y);
+            if (interpolatedZ > bitmap.GetZ(x, y))
+                return;
+
+            var lightColor = this.colorPicker.GetColor(polygon, x, y);
+            bitmap.SetZ(x, y, interpolatedZ);
+            bitmap.SetPixel(x, y, lightColor);
+        }
+    }
+
     public class ScanLine
     {
         private static List<Edge>[] BucketSort(Polygon polygon, int minY, int maxY)
@@ -23,9 +71,9 @@ namespace SketcherControl.Filling
             return sortedEdges;
         }
 
-        public static void Fill(Polygon polygon, DirectBitmap canvas, IColorPicker colorPicker, Color color)
+        public static void Run(Polygon polygon, IPixelProcessor processor)
         {
-            colorPicker.StartFillingTriangle(polygon.Vertices);
+            processor.StartProcessing(polygon);
             polygon.GetMaxPoints(out var maxPoint, out var minPoint);
 
             var ET = BucketSort(polygon, minPoint.Y, maxPoint.Y);
@@ -52,14 +100,7 @@ namespace SketcherControl.Filling
                         var currentX = xi;
                         var currentY = y + minPoint.Y;
 
-                        var interpolatedZ = colorPicker.InterpolateZ(polygon, currentX, currentY);
-
-                        var lightColor = colorPicker.GetColor(polygon, xi, y + minPoint.Y);
-                        if (interpolatedZ <= canvas.GetZ(currentX, currentY))
-                        {
-                            canvas.SetZ(currentX, currentY, interpolatedZ);
-                            canvas.SetPixel(currentX, currentY, lightColor);
-                        }
+                        processor.Process(polygon, currentX, currentY);
                     }
                 }
 

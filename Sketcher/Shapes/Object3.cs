@@ -1,22 +1,25 @@
 ﻿
 using SketcherControl.Filling;
 using System.Numerics;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace SketcherControl.Shapes
 {
     public class Object3
     {
         private int objectIndx;
-        private int RenderThreads = 100;
+        private int RenderThreads = 20;
         private readonly List<Triangle> triangles = new();
         private float rotationX;
         private float rotationY;
 
         private Matrix4x4 model;
-
         private Color color;
+        private BarycentricProcessor barycentricProcessor = new();
 
         public SizeF ObjectSize { get; private set; }
+        public DirectBitmap Layer { get; set; } = new DirectBitmap(1, 1);
 
         public Object3(List<Triangle> triangles, SizeF objectSize, int objectIndx)
         {
@@ -29,20 +32,27 @@ namespace SketcherControl.Shapes
             else
                 this.color = Color.MediumPurple;
         }
-
-        public void Render(DirectBitmap bitmap, Vector3 cameraPosition, bool showLines = true, ColorPicker? colorPicker = null)
+        
+        public void UpdateTrianglesVisibility(int viewWidth, int viewHeight, Vector3 lookVector)
         {
-            Vector3 lookVector = -cameraPosition;
-
-            if(colorPicker != null)
+            foreach (var triangle in this.triangles)
             {
-                var colorPickerWithScale = new TargetColorColorPickerDecorator(colorPicker, this.color);
+                triangle.UpdateVisibility(viewWidth, viewHeight, lookVector);
+            }
+        }
+
+        public void Render(DirectBitmap bitmap, bool showLines = true, ColorPicker? colorPicker = null)
+        {
+            if (colorPicker != null)
+            {
+                var colorPickerWithTargetColor = new TargetColorColorPickerDecorator(colorPicker, this.color);
+                PixelPainter pixelPainter = new(bitmap, colorPickerWithTargetColor);
 
                 if (RenderThreads == 1)
                 {
                     foreach (var triangle in this.triangles)
                     {
-                        ScanLine.Fill(triangle, bitmap, colorPickerWithScale, this.color);
+                        ScanLine.Run(triangle, pixelPainter);
                     }
                 }
                 else
@@ -52,7 +62,7 @@ namespace SketcherControl.Shapes
 
                     for (int i = 0; i < RenderThreads; i++)
                     {
-                        tasks.Add(FillAsync(bitmap, colorPickerWithScale, i * trianglesPerThread, trianglesPerThread, lookVector));
+                        tasks.Add(FillAsync(pixelPainter, i * trianglesPerThread, trianglesPerThread));
                     }
 
                     Task.WaitAll(tasks.ToArray());
@@ -63,25 +73,39 @@ namespace SketcherControl.Shapes
             {
                 foreach (var triangle in triangles)
                 {
-                    triangle.Render(bitmap, lookVector);
+                    triangle.Render(bitmap);
                 }
             }
         }
 
-        private Task FillAsync(DirectBitmap bitmap, ColorPicker colorPicker, int start, int step, Vector3 lookVector)
+        private Task FillAsync(PixelPainter painter, int start, int step)
         {
             return Task.Run(
                 () =>
                 {
                     for (int j = start; j < start + step && j < this.triangles.Count; j++)
                     {
-                        if (this.triangles[j].IsVisible(bitmap.Width, bitmap.Height, lookVector))
-                            ScanLine.Fill(this.triangles[j], bitmap, colorPicker, this.color);
+                        if (this.triangles[j].IsVisible)
+                            ScanLine.Run(this.triangles[j], painter);
                     }
                 });
         }
 
-        public void SetRenderScale(int width, int height, Matrix4x4 view, Matrix4x4 position)
+        private Task CalculateCoefficientsAsync(int start, int step)
+        {
+            return Task.Run(() =>
+            {
+                for (int j = start; j < start + step && j < this.triangles.Count; j++)
+                {
+                    if (this.triangles[j].IsVisible)
+                    {
+                        ScanLine.Run(this.triangles[j], this.barycentricProcessor);
+                    }
+                }
+            });
+        }
+
+        public void Transform(int width, int height, Matrix4x4 view, Matrix4x4 position)
         {
             if (this.objectIndx % 2 == 0)
                 this.rotationX += 2 * 2 * (float)Math.PI / height;
@@ -92,9 +116,28 @@ namespace SketcherControl.Shapes
             var rotationY = Matrix4x4.CreateRotationY(this.rotationY);
             this.model = rotationX * rotationY;
 
-            foreach (var triangle in triangles)
+            foreach (var triangle in this.triangles)
             {
                 triangle.SetRenderScale(width, height, this.model, view, position);
+            }
+        }
+
+        public void CalculateCoefficients()
+        {
+            //List<Task> tasks = new();
+
+            //var trianglesPerThread = (int)Math.Ceiling((float)this.triangles.Count / RenderThreads);
+
+            //for (int i = 0; i < RenderThreads; i++)
+            //{
+            //    tasks.Add(CalculateCoefficientsAsync(i * trianglesPerThread, trianglesPerThread));
+            //}
+
+            //Task.WaitAll(tasks.ToArray());
+
+            foreach (var triangle in this.triangles)
+            {
+                ScanLine.Run(triangle, this.barycentricProcessor);
             }
         }
     }
