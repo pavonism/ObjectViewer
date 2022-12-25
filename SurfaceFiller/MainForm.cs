@@ -90,7 +90,7 @@ namespace SurfaceFiller
             {
                 X = this.sceneViewer.CameraVector.X,
                 Y = this.sceneViewer.CameraVector.Y,
-                Z = 1 + 5 * obj,
+                Z = -5 + 10 * obj,
             };
         }
 
@@ -99,7 +99,7 @@ namespace SurfaceFiller
             this.sceneViewer.CameraVector = new Vector3()
             {
                 X = this.sceneViewer.CameraVector.X,
-                Y = 1 + 5 * obj,
+                Y = -5 + 10 * obj,
                 Z = this.sceneViewer.CameraVector.Z,
             };
         }
@@ -108,7 +108,7 @@ namespace SurfaceFiller
         {
             this.sceneViewer.CameraVector = new Vector3()
             {
-                X = 1 + 5 * obj,
+                X = -5 + 10 * obj,
                 Y = this.sceneViewer.CameraVector.Y,
                 Z = this.sceneViewer.CameraVector.Z,
             };

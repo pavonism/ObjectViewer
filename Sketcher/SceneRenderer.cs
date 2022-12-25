@@ -64,7 +64,7 @@ namespace SketcherControl
             {
                 obj.Transform(parameters.ViewWidth, parameters.ViewHeight, parameters.View, parameters.Position);
                 obj.UpdateTrianglesVisibility(parameters.ViewWidth, parameters.ViewHeight, parameters.LookVector);
-                //obj.CalculateCoefficients();
+                obj.UpdateBarycentricCache();
             });
         }
 

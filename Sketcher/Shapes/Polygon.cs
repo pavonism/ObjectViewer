@@ -2,6 +2,16 @@
 
 namespace SketcherControl.Shapes
 {
+    public class BarycentricCache
+    {
+        public Vector2 v0 { get; set; }
+        public Vector2 v1 { get; set; }
+        public float d00 { get; set; }
+        public float d01 { get; set; }
+        public float d11 { get; set; }
+        public float denom { get; set; }
+    }
+
     public abstract class Polygon
     {
         public Vertex[] Vertices { get; protected set; } = new Vertex[0];
@@ -13,6 +23,9 @@ namespace SketcherControl.Shapes
 
         public readonly Dictionary<(int, int), Vector3> CoefficientsCache = new();
         public readonly Dictionary<(int, int), Vector4> NormalVectorsCache = new();
+
+        public BarycentricCache BarycentricCache { get; set; }
+        public Matrix4x4 colors { get; set; }  
 
         public virtual void GetMaxPoints(out Point max, out Point min)
         {
@@ -29,6 +42,22 @@ namespace SketcherControl.Shapes
 
             max = new Point((int)Math.Ceiling(maxPoint.X), (int)Math.Ceiling(maxPoint.Y));
             min = new Point((int)minPoint.X, (int)minPoint.Y);
+        }
+
+        internal void UpdateColorMatrix()
+        {
+            this.colors = new()
+            {
+                M11 = this.Vertices[2].Color.X,
+                M21 = this.Vertices[0].Color.X,
+                M31 = this.Vertices[1].Color.X,
+                M12 = this.Vertices[2].Color.Y,
+                M22 = this.Vertices[0].Color.Y,
+                M32 = this.Vertices[1].Color.Y,
+                M13 = this.Vertices[2].Color.Z,
+                M23 = this.Vertices[0].Color.Z,
+                M33 = this.Vertices[1].Color.Z,
+            };
         }
     }
 }

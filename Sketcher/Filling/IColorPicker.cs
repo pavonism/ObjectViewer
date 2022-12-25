@@ -9,7 +9,7 @@ namespace SketcherControl.Filling
 {
     public interface IColorPicker
     {
-        void StartFillingTriangle(IEnumerable<Vertex> vertices);
+        void StartFillingTriangle(Polygon polugon);
         public Color GetColor(Polygon polygon, int x, int y);
         float InterpolateZ(Polygon polygon, int x, int y);
     }

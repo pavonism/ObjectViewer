@@ -11,11 +11,9 @@ namespace SketcherControl.Filling
 
     public class BarycentricProcessor : IPixelProcessor
     {
-        private Interpolator interpolator = new();
-
         public void Process(Polygon polygon, int x, int y)
         {
-            interpolator.CalculateCoefficients(polygon, x, y);
+            Interpolator.CalculateCoefficients(polygon, x, y);
         }
 
         public void StartProcessing(Polygon polygon)
@@ -36,7 +34,7 @@ namespace SketcherControl.Filling
 
         public void StartProcessing(Polygon polygon)
         {
-            colorPicker.StartFillingTriangle(polygon.Vertices);
+            colorPicker.StartFillingTriangle(polygon);
         }
 
         public void Process(Polygon polygon, int x, int y)

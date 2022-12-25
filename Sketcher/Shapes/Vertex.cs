@@ -10,7 +10,7 @@ namespace SketcherControl.Shapes
         public Vector4 GlobalNormalVector;
         public Vector4 RenderLocation;
         public Vector4 GlobalLocation;
-        public Color Color { get; set; }
+        public Vector4 Color { get; set; }
 
         public event Action? RenderCoordinatesChanged;
 

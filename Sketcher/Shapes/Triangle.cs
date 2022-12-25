@@ -38,6 +38,7 @@ namespace SketcherControl.Shapes
         {
             CoefficientsCache.Clear();
             NormalVectorsCache.Clear();
+            BarycentricCache = null;
         }
 
         public void SetRenderScale(int width, int height, Matrix4x4 model, Matrix4x4 view, Matrix4x4 position)

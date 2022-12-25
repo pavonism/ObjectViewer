@@ -1,5 +1,6 @@
 ﻿
 using SketcherControl.Filling;
+using SketcherControl.Geometrics;
 using System.Numerics;
 using System.Reflection;
 using System.Windows.Forms;
@@ -13,10 +14,11 @@ namespace SketcherControl.Shapes
         private readonly List<Triangle> triangles = new();
         private float rotationX;
         private float rotationY;
+        private float circleRotation;
+        private Vector3 radius = new Vector3(0, 1.5f, 0);
 
         private Matrix4x4 model;
         private Color color;
-        private BarycentricProcessor barycentricProcessor = new();
 
         public SizeF ObjectSize { get; private set; }
         public DirectBitmap Layer { get; set; } = new DirectBitmap(1, 1);
@@ -91,20 +93,6 @@ namespace SketcherControl.Shapes
                 });
         }
 
-        private Task CalculateCoefficientsAsync(int start, int step)
-        {
-            return Task.Run(() =>
-            {
-                for (int j = start; j < start + step && j < this.triangles.Count; j++)
-                {
-                    if (this.triangles[j].IsVisible)
-                    {
-                        ScanLine.Run(this.triangles[j], this.barycentricProcessor);
-                    }
-                }
-            });
-        }
-
         public void Transform(int width, int height, Matrix4x4 view, Matrix4x4 position)
         {
             if (this.objectIndx % 2 == 0)
@@ -112,9 +100,14 @@ namespace SketcherControl.Shapes
             else
                 this.rotationY += 2 * 2 * (float)Math.PI / width;
 
+            this.circleRotation += (float)Math.PI / Math.Min(height, width);
+
             var rotationX = Matrix4x4.CreateRotationX(this.rotationX);
             var rotationY = Matrix4x4.CreateRotationY(this.rotationY);
-            this.model = rotationX * rotationY;
+            var translate = Matrix4x4.CreateTranslation(radius);
+            var rotation = Matrix4x4.CreateRotationZ(circleRotation);
+
+            this.model = /*rotationX * rotationY **/ translate * rotation;
 
             foreach (var triangle in this.triangles)
             {
@@ -122,22 +115,11 @@ namespace SketcherControl.Shapes
             }
         }
 
-        public void CalculateCoefficients()
+        internal void UpdateBarycentricCache()
         {
-            //List<Task> tasks = new();
-
-            //var trianglesPerThread = (int)Math.Ceiling((float)this.triangles.Count / RenderThreads);
-
-            //for (int i = 0; i < RenderThreads; i++)
-            //{
-            //    tasks.Add(CalculateCoefficientsAsync(i * trianglesPerThread, trianglesPerThread));
-            //}
-
-            //Task.WaitAll(tasks.ToArray());
-
             foreach (var triangle in this.triangles)
             {
-                ScanLine.Run(triangle, this.barycentricProcessor);
+                Interpolator.CalculateBarycentricCache(triangle);
             }
         }
     }

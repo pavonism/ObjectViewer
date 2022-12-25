@@ -1,10 +1,16 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace SketcherControl.Geometrics
 {
     public static class GeometricExtensions
     {
+        public static Vector3 ToVector3(this Vector4 vector)
+        {
+            return new Vector3(vector.X, vector.Y, vector.Z);
+        }
+
         public static Vector4 Cross(this Vector4 v1, Vector4 v2)
         {
             return new Vector4(v1.Y * v2.Z - v1.Z * v2.Y, v1.Z * v2.X - v1.X * v2.Z, v1.X * v2.Y - v1.Y * v2.X, 0);
@@ -25,11 +31,38 @@ namespace SketcherControl.Geometrics
 
         public static Color ToColor(this Vector4 vector)
         {
-            var r = float.IsNaN(vector.X) || float.IsInfinity(vector.X) ? 255 : (int)Math.Min(Math.Max(0, vector.X) * 255, 255);
-            var g = float.IsNaN(vector.Y) || float.IsInfinity(vector.Y) ? 255 : (int)Math.Min(Math.Max(0, vector.Y) * 255, 255);
-            var b = float.IsNaN(vector.Z) || float.IsInfinity(vector.Z) ? 255 : (int)Math.Min(Math.Max(0, vector.Z) * 255, 255);
+            vector.Cut();
+            return Color.FromArgb((int)(vector.X * 255), (int)(vector.Y * 255), (int)(vector.Z * 255));
+        }
 
-            return Color.FromArgb(r, g, b);
+        public static Vector4 Cut(this ref Vector4 vector)
+        {
+            if (vector.X < 0) vector.X = 0;
+            if (vector.X > 1) vector.X = 1;
+            if (vector.Y < 0) vector.Y = 0;
+            if (vector.Y > 1) vector.Y = 1;
+            if (vector.Z < 0) vector.Z = 0;
+            if (vector.Z > 1) vector.Z = 1;
+
+            vector.W = 0;
+            return vector;
+        }
+
+        public static Vector3 Cut(this ref Vector3 vector)
+        {
+            if (vector.X < 0) vector.X = 0;
+            if (vector.X > 1) vector.X = 1;
+            if (vector.Y < 0) vector.Y = 0;
+            if (vector.Y > 1) vector.Y = 1;
+            if (vector.Z < 0) vector.Z = 0;
+            if (vector.Z > 1) vector.Z = 1;
+            return vector;
+        }
+
+        public static Color ToColor(this Vector3 vector)
+        {
+            vector.Cut();
+            return Color.FromArgb((int)(vector.X * 255), (int)(vector.Y * 255), (int)(vector.Z * 255));
         }
 
         public static int CenterX(this Rectangle rect)
