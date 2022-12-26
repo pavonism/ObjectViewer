@@ -191,14 +191,16 @@ namespace SurfaceFiller.Components
             return combo;
         }
 
-        public ComboPicker<T> AddComboPicker<T>(Action<T> valuePickedHandler)
+        public ComboPicker<T> AddComboPicker<T>(Action<T> valuePickedHandler, T[] values, T defaul)
         {
             var combo = new ComboPicker<T>()
             {
-                Width = this.Width - (int)(2.5 * FormConstants.MinimumControlSize),
+                Width = this.Width - Margin.Left - Margin.Right,
             };
 
             combo.ValuePicked += valuePickedHandler;
+            combo.AddOptions(values);
+            combo.Select(defaul);
 
             AddControl(combo);
             return combo;

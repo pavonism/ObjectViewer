@@ -1,8 +1,9 @@
 ﻿using SketcherControl.Filling;
 using SketcherControl.Shapes;
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
 
-namespace SketcherControl
+namespace SketcherControl.SceneManipulation
 {
     public class Scene
     {
@@ -12,13 +13,14 @@ namespace SketcherControl
         public LightSource LightSource { get; }
         public ColorPicker ColorPicker { get; }
 
-        public IEnumerable<Object3> Objects => this.objects.ToList();
-        public bool IsEmpty => !this.objects.Any();
+        public IEnumerable<Object3> Objects => objects.ToList();
+        public bool IsEmpty => !objects.Any();
+        public Object3 MovingObject { get; set; }
         #endregion Fields and Properties
 
         public Scene()
         {
-            this.objects = new();
+            objects = new();
             LightSource = new();
             ColorPicker = new(LightSource);
 
@@ -32,7 +34,7 @@ namespace SketcherControl
 
         private void SendSceneChanged()
         {
-            this.SceneChanged?.Invoke(this);
+            SceneChanged?.Invoke(this);
         }
         private void ParametersChangedHandler()
         {
@@ -41,7 +43,7 @@ namespace SketcherControl
         #endregion Events
 
         #region Loading Object
-        public void LoadObjectFromFile(string fileName)
+        public string LoadObjectDataFromFile(string fileName)
         {
             string fileContent;
 
@@ -50,15 +52,21 @@ namespace SketcherControl
                 fileContent = reader.ReadToEnd();
             }
 
-            LoadObject(fileContent);
+            return fileContent;
         }
 
+        public Object3 AddObjectFromFile(string fileName)
+        {
+            var fileContent = LoadObjectDataFromFile(fileName);
+            return AddObjectFromStringData(fileContent);
+        }
 
-        public void LoadObject(string shapeObject)
+        public Object3 AddObjectFromStringData(string shapeObject)
         {
             List<Triangle> triangles = new List<Triangle>();
-            PointF minPoint = new(float.MaxValue, float.MaxValue);
-            PointF maxPoint = new(float.MinValue, float.MinValue);
+            Vector3 minPoint = new(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 maxPoint = new(float.MinValue, float.MinValue, float.MinValue);
+
             LightSource.MinZ = float.MinValue;
             List<Vertex> vertices = new List<Vertex>();
             List<Vector4> normalVectors = new List<Vector4>();
@@ -84,6 +92,10 @@ namespace SketcherControl
                     maxPoint.Y = y;
                 if (y < minPoint.Y)
                     minPoint.Y = y;
+                if (z > maxPoint.Z)
+                    maxPoint.Z = z;
+                if (z < minPoint.Z)
+                    minPoint.Z = z;
             }
 
             foreach (var line in lines.Where((line) => line.StartsWith("vn")))
@@ -108,15 +120,17 @@ namespace SketcherControl
                 triangle = new();
             }
 
-            var objectSize = new SizeF(Math.Abs(maxPoint.X - minPoint.X), Math.Abs(maxPoint.Y - minPoint.Y));
-            this.objects.Add(new Object3(triangles, objectSize, this.objects.Count - 1));
+            var objectSize = new Vector3(Math.Abs(maxPoint.X - minPoint.X), Math.Abs(maxPoint.Y - minPoint.Y), Math.Abs(maxPoint.Z - minPoint.Z));
+            var result = new Object3(triangles, objectSize, objects.Count - 1);
+            objects.Add(result);
             SendSceneChanged();
+            return result;
         }
         #endregion
 
         public void Clear()
         {
-            this.objects.Clear();
+            objects.Clear();
         }
     }
 }

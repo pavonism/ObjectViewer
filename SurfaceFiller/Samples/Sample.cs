@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace SurfaceFiller.Samples
 {
-    internal abstract class BasicSample
+    public abstract class BasicSample
     {
         public string Name { get; set; }
 

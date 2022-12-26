@@ -11,7 +11,7 @@ namespace SketcherControl.Filling
             _colorPicker = colorPicker;
         }
 
-        public override Interpolation InterpolationMode { get => _colorPicker.InterpolationMode; set => _colorPicker.InterpolationMode = value; }
+        public override Shaders ShadersType { get => _colorPicker.ShadersType; set => _colorPicker.ShadersType = value; }
         public override float KD { get => _colorPicker.KD; set => _colorPicker.KD = value; }
         public override float KS { get => _colorPicker.KS; set => _colorPicker.KD = value; }
         public override int M { get => _colorPicker.M; set => _colorPicker.KD = value; }

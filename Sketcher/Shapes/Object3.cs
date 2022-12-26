@@ -1,8 +1,9 @@
-﻿
-using SketcherControl.Filling;
+﻿using SketcherControl.Filling;
 using SketcherControl.Geometrics;
+using SketcherControl.SceneManipulation;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace SketcherControl.Shapes
@@ -12,18 +13,19 @@ namespace SketcherControl.Shapes
         private int objectIndx;
         private int RenderThreads = 20;
         private readonly List<Triangle> triangles = new();
-        private float rotationX;
-        private float rotationY;
-        private float circleRotation;
-        private Vector3 radius = new Vector3(0, 1.5f, 0);
+        public Vector3 Location { get; private set; }
 
-        private Matrix4x4 model;
+        public Matrix4x4 Model => this.Rotation * this.Translation;
+        public Matrix4x4 Rotation { get; private set; } = Matrix4x4.Identity;
+        public Matrix4x4 Translation { get; private set; } = Matrix4x4.Identity;
+
         private Color color;
 
-        public SizeF ObjectSize { get; private set; }
+        public IAnimation? Animation { get; set; }
+        public Vector3 ObjectSize { get; private set; }
         public DirectBitmap Layer { get; set; } = new DirectBitmap(1, 1);
 
-        public Object3(List<Triangle> triangles, SizeF objectSize, int objectIndx)
+        public Object3(List<Triangle> triangles, Vector3 objectSize, int objectIndx)
         {
             this.triangles = triangles;
             ObjectSize = objectSize;
@@ -35,11 +37,11 @@ namespace SketcherControl.Shapes
                 this.color = Color.MediumPurple;
         }
         
-        public void UpdateTrianglesVisibility(int viewWidth, int viewHeight, Vector3 lookVector)
+        public void UpdateTrianglesVisibility(Vector3 lookVector)
         {
             foreach (var triangle in this.triangles)
             {
-                triangle.UpdateVisibility(viewWidth, viewHeight, lookVector);
+                triangle.UpdateVisibility(lookVector);
             }
         }
 
@@ -95,24 +97,22 @@ namespace SketcherControl.Shapes
 
         public void Transform(int width, int height, Matrix4x4 view, Matrix4x4 position)
         {
-            if (this.objectIndx % 2 == 0)
-                this.rotationX += 2 * 2 * (float)Math.PI / height;
-            else
-                this.rotationY += 2 * 2 * (float)Math.PI / width;
-
-            this.circleRotation += (float)Math.PI / Math.Min(height, width);
-
-            var rotationX = Matrix4x4.CreateRotationX(this.rotationX);
-            var rotationY = Matrix4x4.CreateRotationY(this.rotationY);
-            var translate = Matrix4x4.CreateTranslation(radius);
-            var rotation = Matrix4x4.CreateRotationZ(circleRotation);
-
-            this.model = /*rotationX * rotationY **/ translate * rotation;
+            if(Animation != null)
+            {
+                this.Rotation *= Animation.GetRotation();
+                this.Translation *= Animation.GetTranslation();
+            }
 
             foreach (var triangle in this.triangles)
             {
-                triangle.SetRenderScale(width, height, this.model, view, position);
+                triangle.SetRenderScale(width, height, Model, view, position);
             }
+        }
+
+        public void MoveTo(float x, float y, float z)
+        {
+            this.Location = new Vector3(x, y, z);
+            this.Translation = Matrix4x4.CreateTranslation(Location);
         }
 
         internal void UpdateBarycentricCache()

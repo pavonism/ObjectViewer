@@ -163,7 +163,7 @@ namespace SketcherControl.Filling
 
         //            if (Renderer.Size.Width <= currentXLight || currentXLight <= 0 || currentYLight <= 0 || currentYLight >= Renderer.Size.Height)
         //                continue;
-        //            canvas.SetPixel(currentXLight, canvas.Height - currentYLight, LightSourceColor == Color.White ? Color.Gold : LightSourceColor);
+        //            canvas.SetPixel(currentXLight, canvas.Height - currentYLight, LightSourceColor == Gouraud.White ? Gouraud.Gold : LightSourceColor);
         //        }
         //    }
         //}

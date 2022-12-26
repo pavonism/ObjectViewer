@@ -1,5 +1,8 @@
-﻿using SketcherControl;
+﻿using ObjectViewer.Samples;
+using ObjectViewer.Scenes;
+using SketcherControl;
 using SketcherControl.Filling;
+using SketcherControl.SceneManipulation;
 using SurfaceFiller.Components;
 using SurfaceFiller.Samples;
 using System.Drawing.Imaging;
@@ -12,13 +15,21 @@ namespace SurfaceFiller
     {
         private TableLayoutPanel mainTableLayout = new();
         private Toolbar toolbar = new() { Width = FormConstants.ToolbarWidth };
-        private FlowLayoutPanel fillSection;
+        private FlowLayoutPanel freeCameraSection;
         private SceneViewer sceneViewer;
         private Scene scene;
-        private ICombo<BasicSample> objectCombo;
         private ComboPickerWithImage<Sample> objectSurfaceCombo;
         private ComboPickerWithImage<Sample> normalMapCombo;
         private ColorSample colorSample;
+
+        private CameraSample[] cameras =
+        {
+            new CameraSample(Labels.StaticCamera, new BaseCamera()),
+            new CameraSample(Labels.FollowingCamera, new FollowingCamera()),
+            new CameraSample(Labels.FirstPersonCamera, new FirstPersonCamera()), 
+            new CameraSample(Labels.ThirdPersonCamera, new ThirdPersonCamera()), 
+            new CameraSample(Labels.FreeCamera, new FreeCamera()),
+        };
 
         public MainForm()
         {
@@ -28,12 +39,12 @@ namespace SurfaceFiller
             InitializeForm();
             LoadTextureSamples();
             LoadNormalMapSamples();
-            LoadObjectSamples();
         }
 
         private void InitializeScene()
         {
-            this.scene = new();
+            var builder = new SampleSceneBuilder();
+            this.scene = builder.Build();
             this.sceneViewer = new(this.scene);
         }
 
@@ -42,38 +53,29 @@ namespace SurfaceFiller
         {
             this.toolbar.AddLabel(Resources.ProgramTitle);
             this.toolbar.AddDivider();
-            this.objectCombo = this.toolbar.AddComboApply<BasicSample>(ObjectPickedHandler, Labels.ApplyButtonLabel);
-            this.toolbar.AddButton(OpenFileHandler, Glyphs.File, Hints.OpenOBJ);
-            this.toolbar.AddButton(ClearHandler, Glyphs.Reset);
-            //this.toolbar.AddSlider(ThreadsSlidrerHandler, Labels.ThreadSlider, Defaults.ThreadsCount);
-            this.toolbar.AddDivider();
             this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, false);
             this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, true);
+            this.toolbar.AddDivider();
             this.toolbar.StartSection();
-            this.toolbar.AddRadioOption(ColorInterpolationOptionHandler, Labels.ColorInterpolationOption, Hints.ColorInterpolation, true);
-            this.toolbar.AddRadioOption(VectorInterpolationOptionHandler, Labels.VectorsInterpolationOption, Hints.VectorInterpolation);
+            this.toolbar.AddRadioOption(ConstShadersOptionHandler, Labels.ConstShaders);
+            this.toolbar.AddRadioOption(ColorInterpolationOptionHandler, Labels.GouraudShaders, Hints.ColorInterpolation, true);
+            this.toolbar.AddRadioOption(VectorInterpolationOptionHandler, Labels.PhongShaders, Hints.VectorInterpolation);
             this.toolbar.EndSection();
             this.toolbar.AddDivider();
-            this.toolbar.AddSlider(FovSliderHandler, "FOV", 0.35f);
-            this.toolbar.AddSlider(CameraXHandler, "CameraX");
-            this.toolbar.AddSlider(CameraYHandler, "CameraY");
-            this.toolbar.AddSlider(CameraZHandler, "CameraZ");
+            this.toolbar.AddLabel(Labels.Camera);
+            this.freeCameraSection = this.toolbar.StartSection();
+            this.toolbar.AddSlider(FovSliderHandler, Labels.FOV, Defaults.FOV);
+            this.toolbar.AddSlider(CameraXHandler, Labels.CameraX, Defaults.CameraXLocation);
+            this.toolbar.AddSlider(CameraYHandler, Labels.CameraY, Defaults.CameraYLocation);
+            this.toolbar.AddSlider(CameraZHandler, Labels.CameraZ, Defaults.CameraZLocation);
+            this.toolbar.EndSection();
+            this.toolbar.AddComboPicker(CameraChangedHandler, this.cameras, this.cameras.First());
             this.toolbar.AddDivider();
-            this.fillSection = this.toolbar.StartSection();
-            this.toolbar.AddLabel(Labels.ModelParameters);
+            this.toolbar.StartSection();
+            this.toolbar.AddLabel(Labels.ShaderParameters);
             this.toolbar.AddFractSlider(KDParameterHandler, Labels.KDParameter, Defaults.KDParameter);
             this.toolbar.AddFractSlider(KSParameterHandler, Labels.KSParameter, Defaults.KSParameter);
             this.toolbar.AddSlider(MParameterHandler, Labels.MParameter, Defaults.MParameter);
-            this.toolbar.AddDivider();
-            this.toolbar.AddLabel(Labels.LightSection);
-            this.toolbar.AddPlayPouse(SunHandler, false);
-            this.toolbar.AddProcessButton(RewindHandler, Glyphs.Rewind);
-            this.toolbar.AddProcessButton(MoveForwardHandler, Glyphs.Forward);
-            this.toolbar.AddButton(LightColorButtonHandler, Glyphs.Palette, Hints.ChangeLightColor);
-            this.toolbar.AddTool(ShowTrackHandler, Glyphs.Spiral, Hints.ShowTrack);
-            this.toolbar.AddButton(ResetPositionButtonHandler, Glyphs.Reset, Hints.ResetPosition);
-            this.toolbar.AddSlider(SunSpeedHanlder, Labels.Speed, Defaults.AnimationSpeed);
-            this.toolbar.AddSlider(SunZLocationHandler, Labels.ZLocation, Defaults.LightLocationZ);
             this.toolbar.AddDivider();
             this.toolbar.AddLabel(Labels.ObjectSurface);
             this.objectSurfaceCombo = this.toolbar.AddComboImagePicker<Sample>(TexturePickedHandler);
@@ -82,6 +84,40 @@ namespace SurfaceFiller
             this.normalMapCombo = this.toolbar.AddComboImagePicker<Sample>(NormalMapPickedHandler);
             this.toolbar.AddButton(VectorMapHandler, Glyphs.File, Hints.LoadNormalMap);
             this.toolbar.EndSection();
+        }
+
+        private void InitializeForm()
+        {
+            this.Text = Resources.ProgramTitle;
+            this.MinimumSize = new Size(FormConstants.MinimumWindowSizeX, FormConstants.MinimumWindowSizeY);
+            this.Size = new Size(FormConstants.InitialWindowSizeX, FormConstants.InitialWindowSizeY);
+        }
+
+        private void ArrangeComponents()
+        {
+            this.mainTableLayout.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            this.mainTableLayout.ColumnCount = FormConstants.MainFormColumnCount;
+
+            this.mainTableLayout.Controls.Add(this.sceneViewer, 1, 0);
+            this.mainTableLayout.Controls.Add(this.toolbar, 0, 0);
+            this.mainTableLayout.Dock = DockStyle.Fill;
+            this.Controls.Add(mainTableLayout);
+        }
+        #endregion
+
+        #region Handlers 
+        private void ConstShadersOptionHandler(object? sender, EventArgs e)
+        {
+            this.scene.ColorPicker.ShadersType = Shaders.Const;
+        }
+
+        private void CameraChangedHandler(CameraSample cameraSample)
+        {
+            sceneViewer.Freeze();
+            cameraSample.Camera.Apply(this.sceneViewer);
+
+            this.freeCameraSection.Visible = cameraSample.Name == Labels.FreeCamera;
+            sceneViewer.Thaw();
         }
 
         private void CameraZHandler(float obj)
@@ -119,54 +155,19 @@ namespace SurfaceFiller
             this.sceneViewer.FOV = (float)(Math.PI / 6 + obj * Math.PI / 2);
         }
 
-        private void ClearHandler(object? sender, EventArgs e)
-        {
-            this.scene.Clear();
-        }
-
-        private void InitializeForm()
-        {
-            this.Text = Resources.ProgramTitle;
-            this.MinimumSize = new Size(FormConstants.MinimumWindowSizeX, FormConstants.MinimumWindowSizeY);
-            this.Size = new Size(FormConstants.InitialWindowSizeX, FormConstants.InitialWindowSizeY);
-        }
-
-        private void ArrangeComponents()
-        {
-            this.mainTableLayout.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
-            this.mainTableLayout.ColumnCount = FormConstants.MainFormColumnCount;
-
-            this.mainTableLayout.Controls.Add(this.sceneViewer, 1, 0);
-            this.mainTableLayout.Controls.Add(this.toolbar, 0, 0);
-            this.mainTableLayout.Dock = DockStyle.Fill;
-            this.Controls.Add(mainTableLayout);
-        }
-        #endregion
-
-        #region Handlers 
         private void FillObjectsHandler(object? sender, EventArgs e)
         {
             this.sceneViewer.Fill = !this.sceneViewer.Fill;
-            //this.fillSection.Visible = this.sceneViewer.Fill;
-            //this.sceneViewer.LightSource.Show = this.sceneViewer.Fill;
         }
 
         private void VectorInterpolationOptionHandler(object? sender, EventArgs e)
         {
-            this.scene.ColorPicker.InterpolationMode = Interpolation.NormalVector;
+            this.scene.ColorPicker.ShadersType = Shaders.Phong;
         }
 
         private void ColorInterpolationOptionHandler(object? sender, EventArgs e)
         {
-            this.scene.ColorPicker.InterpolationMode = Interpolation.Color;
-        }
-
-        private void ObjectPickedHandler(BasicSample newValue)
-        {
-            if (newValue is ObjectSample objectSample)
-            {
-                this.scene.LoadObjectFromFile(objectSample.Path);
-            }
+            this.scene.ColorPicker.ShadersType = Shaders.Gouraud;
         }
 
         private void NormalMapPickedHandler(Sample newValue)
@@ -201,18 +202,6 @@ namespace SurfaceFiller
             }
         }
 
-        private void MoveForwardHandler()
-        {
-            //this.scene.LightSource.MoveLight();
-            //this.sceneViewer.RefreshView();
-        }
-
-        private void RewindHandler()
-        {
-            //this.sceneViewer.LightSource.MoveLight(true);
-            //this.sceneViewer.Render();
-        }
-
         private void LoadTextureHandlar(object? sender, EventArgs e)
         {
             var textureSample = OpenLoadImageDialog();
@@ -222,21 +211,6 @@ namespace SurfaceFiller
                 this.scene.ColorPicker.Pattern = textureSample.Image;
                 this.objectSurfaceCombo.AddAndSelect(textureSample);
             }
-        }
-
-        private void NormalVectorsHandler(object? sender, EventArgs e)
-        {
-            this.scene.ColorPicker.InterpolationMode = this.scene.ColorPicker.InterpolationMode == Interpolation.Color ? Interpolation.NormalVector : Interpolation.Color;
-        }
-
-        private void ThreadsSlidrerHandler(float value)
-        {
-            this.sceneViewer.RenderThreads = (int)(value * 100);
-        }
-
-        private void ShowTrackHandler(bool obj)
-        {
-            this.scene.LightSource.ShowTrack = !this.scene.LightSource.ShowTrack;
         }
 
         private void MParameterHandler(float newValue)
@@ -254,65 +228,10 @@ namespace SurfaceFiller
             this.scene.ColorPicker.KD = newValue;
         }
 
-        private void SunZLocationHandler(float newValue)
-        {
-            this.scene.LightSource.LightLocationZ = newValue;
-        }
-
-        private void SunSpeedHanlder(float newValue)
-        {
-            this.scene.LightSource.LightSpeed = newValue;
-        }
-
-        private void SunHandler(bool newValue)
-        {
-            this.scene.LightSource.LightAnimation = !this.scene.LightSource.LightAnimation;
-        }
-
         private void ShowLinesHandler(object? sender, EventArgs e)
         {
             this.sceneViewer.ShowLines = !this.sceneViewer.ShowLines;
             this.sceneViewer.RefreshView();
-        }
-
-        private void OpenFileHandler(object? sender, EventArgs e)
-        {
-            var fileName = string.Empty;
-
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                openFileDialog.Filter = "Object files (*.obj)|*.obj|All files (*.*)|*.*";
-                openFileDialog.RestoreDirectory = true;
-
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    fileName = openFileDialog.FileName;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(fileName))
-            {
-                this.scene.LoadObjectFromFile(fileName);
-                this.objectCombo.AddAndSelect(SampleGenerator.CreateObjectSample(fileName));
-            }
-        }
-
-        private void ResetPositionButtonHandler(object? sender, EventArgs e)
-        {
-            //this.scene.LightSource.Reset();
-        }
-
-        private void LightColorButtonHandler(object? sender, EventArgs e)
-        {
-
-            ColorDialog MyDialog = new ColorDialog();
-            MyDialog.AllowFullOpen = true;
-            MyDialog.ShowHelp = true;
-            MyDialog.Color = this.scene.LightSource.LightSourceColor;
-
-            // Update the text box color if the user clicks OK 
-            if (MyDialog.ShowDialog() == DialogResult.OK)
-                this.scene.LightSource.LightSourceColor = MyDialog.Color;
         }
 
         private void ObjectColorButtonHandler(object? sender, EventArgs e)
@@ -345,13 +264,6 @@ namespace SurfaceFiller
             var samples = SampleGenerator.GetNormalMaps(Resources.NormalMapsAssets);
             this.normalMapCombo.AddOptions(samples);
             this.normalMapCombo.DefaultValue = samples.FirstOrDefault();
-        }
-
-        private void LoadObjectSamples()
-        {
-            var samples = SampleGenerator.GetObjectSamples(Resources.ObjectAssets);
-            this.objectCombo.AddOptions(samples);
-            this.objectCombo.DefaultValue = samples.FirstOrDefault();
         }
 
         private PictureSample? OpenLoadImageDialog()

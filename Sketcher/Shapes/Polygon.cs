@@ -26,6 +26,31 @@ namespace SketcherControl.Shapes
 
         public BarycentricCache BarycentricCache { get; set; }
         public Matrix4x4 colors { get; set; }  
+        public Color ConstShaderColor { get; set; }
+
+        public Vector4 GetMeanNormal()
+        {
+            Vector4 mean = new();
+
+            foreach (var vertex in Vertices)
+            {
+                mean += vertex.GlobalNormalVector;
+            }
+
+            return mean / this.Vertices.Length;
+        }
+
+        public Vector4 GetMeanCoordinates()
+        {
+            Vector4 mean = new();
+
+            foreach (var vertex in Vertices)
+            {
+                mean += vertex.GlobalLocation;
+            }
+
+            return mean / this.Vertices.Length;
+        }
 
         public virtual void GetMaxPoints(out Point max, out Point min)
         {

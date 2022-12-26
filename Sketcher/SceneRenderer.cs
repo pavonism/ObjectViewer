@@ -1,4 +1,5 @@
-﻿using SketcherControl.Shapes;
+﻿using SketcherControl.SceneManipulation;
+using SketcherControl.Shapes;
 using System.Numerics;
 
 namespace SketcherControl
@@ -63,7 +64,7 @@ namespace SketcherControl
             return Task.Run(() =>
             {
                 obj.Transform(parameters.ViewWidth, parameters.ViewHeight, parameters.View, parameters.Position);
-                obj.UpdateTrianglesVisibility(parameters.ViewWidth, parameters.ViewHeight, parameters.LookVector);
+                obj.UpdateTrianglesVisibility(parameters.LookVector);
                 obj.UpdateBarycentricCache();
             });
         }

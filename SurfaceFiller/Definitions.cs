@@ -5,22 +5,24 @@ namespace SurfaceFiller
 {
     public static class Defaults
     {
-        public const float ThreadsCount = 0.5f;
         public const float KDParameter = 0.8f;
         public const float KSParameter = 0.3f;
         public const float MParameter = 0.5f;
 
-        public const float AnimationSpeed = 0.1f;
-        public const float LightLocationZ = 0.5f;
+        public const float FOV = 0.75f;
+        public const float CameraXLocation = 0.9f;
+        public const float CameraYLocation = 0.9f;
+        public const float CameraZLocation = 0.7f;
     }
 
     public static class Resources
     {
-        public const string ProgramTitle = "SurfaceFiller  \u25B2";
+        public const string ProgramTitle = "ObjectViewer  \u25B2";
 
         public const string TextureAssets = @"..\..\..\..\Assets\Textures";
         public const string NormalMapsAssets = @"..\..\..\..\Assets\NormalMaps";
         public const string ObjectAssets = @"..\..\..\..\Assets\Objects";
+        public const string TorusFile = @"..\..\..\..\Assets\Objects\FullDonut.obj";
         public const string DefaultObject = "Sphere";
 
         public static Color ThemeColor = Color.FromArgb(255, 0, 120, 215);
@@ -45,21 +47,27 @@ namespace SurfaceFiller
     {
         public const string ApplyButtonLabel = "Add";
         public const string ThreadSlider = "Threads";
-        public const string ShowLinesOption = "Show lines";
-        public const string FillObjectsOption = "Fill objects";
-        public const string VectorsInterpolationOption = "Vectors Interpolation";
-        public const string ColorInterpolationOption = "Color Interpolation";
-        public const string ModelParameters = "Model Parameters";
+        public const string ShowLinesOption = "Pokaż linie";
+        public const string FillObjectsOption = "Wypełnianie obiektów";
+        public const string PhongShaders = "Cieniowanie Phonga";
+        public const string GouraudShaders = "Cieniowanie Gourauda";
+        public const string ConstShaders = "Cieniowanie płaskie";
+        public const string Camera = "Kamera";
+        public const string CameraX = "X";
+        public const string CameraY = "Y";
+        public const string CameraZ = "Z";
+        public const string FOV = "FOV";
+        public const string ShaderParameters = "Parametry cieniowania";
         public const string KDParameter = "KD =";
         public const string KSParameter = "KS =";
         public const string MParameter = "M =";
-        public const string LightSection = "Sun Parameters";
-        public const string Speed = "Speed";
-        public const string XLocation = "X";
-        public const string YLocation = "Y";
-        public const string ZLocation = "Z";
         public const string ObjectSurface = "Object Surface";
         public const string NormalMapOption = "NormalMap";
+        public const string StaticCamera = "Kamera statyczna";
+        public const string FollowingCamera = "Kamera śledząca";
+        public const string FirstPersonCamera = "Kamera pierwszoosobowa";
+        public const string ThirdPersonCamera = "Kamera trzecioosobowa";
+        public const string FreeCamera = "Kamera swobodna";
     }
 
     public static class Glyphs

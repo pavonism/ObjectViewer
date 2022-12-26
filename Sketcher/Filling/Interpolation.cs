@@ -1,9 +1,10 @@
 ﻿
 namespace SketcherControl.Filling
 {
-    public enum Interpolation
+    public enum Shaders
     {
-        Color, 
-        NormalVector,
+        Gouraud, 
+        Phong,
+        Const
     }
 }

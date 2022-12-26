@@ -11,6 +11,7 @@ namespace SketcherControl.Shapes
         }
 
         public bool IsVisible { get; private set; }
+        private bool isInCube;
 
         public void AddVertex(Vertex vertex, Vector4? normalVector = null)
         {
@@ -31,21 +32,16 @@ namespace SketcherControl.Shapes
             }
 
             VertexCount++;
-            vertex.RenderCoordinatesChanged += RenderCoordinatesChangedHandler;
-        }
-
-        private void RenderCoordinatesChangedHandler()
-        {
-            CoefficientsCache.Clear();
-            NormalVectorsCache.Clear();
-            BarycentricCache = null;
         }
 
         public void SetRenderScale(int width, int height, Matrix4x4 model, Matrix4x4 view, Matrix4x4 position)
         {
+            isInCube = true;
+
             foreach (var vertex in Vertices)
             {
-                vertex.Transform(width, height, model, view, position);
+                if (!vertex.Transform(width, height, model, view, position))
+                    isInCube = false;
             }
 
             foreach (var edge in Edges)
@@ -70,10 +66,13 @@ namespace SketcherControl.Shapes
             }
         }
 
-        public void UpdateVisibility(int width, int height, Vector3 lookVector)
+        public void UpdateVisibility(Vector3 lookVector)
         {
-            GetMaxPoints(out var max, out var min);
-            bool inView = max.X < width && max.Y < height && min.X >= 0 && min.Y >= 0;
+            if (!isInCube)
+            {
+                IsVisible = false;
+                return;
+            }
 
             bool visible = false;
             foreach (var vertex in Vertices)
@@ -85,7 +84,7 @@ namespace SketcherControl.Shapes
                 }
             }
 
-            IsVisible = inView && visible;
+            IsVisible = visible;
         }
     }
 }

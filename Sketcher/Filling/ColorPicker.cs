@@ -10,7 +10,7 @@ namespace SketcherControl.Filling
         #region Fields and Events
         public event Action? ParametersChanged;
 
-        private Interpolation interpolationMode;
+        private Shaders interpolationMode;
         private Color targetColor = SketcherConstants.ThemeColor;
         private float kD = 0.5f;
         private float kS = 0.5f;
@@ -22,7 +22,7 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Properties
-        public virtual Interpolation InterpolationMode
+        public virtual Shaders ShadersType
         {
             get => this.interpolationMode;
             set
@@ -148,9 +148,9 @@ namespace SketcherControl.Filling
 
         public void StartFillingTriangle(Polygon polygon)
         {
-            switch (InterpolationMode)
+            switch (ShadersType)
             {
-                case Interpolation.Color:
+                case Shaders.Gouraud:
                     foreach (var vertex in polygon.Vertices)
                     {
                         var textureColor = Pattern?.GetPixel(((int)vertex.RenderLocation.X + Pattern.Width / 2) % Pattern.Width, ((int)vertex.RenderLocation.Y + Pattern.Height / 2) % Pattern.Height).ToVector();
@@ -159,20 +159,31 @@ namespace SketcherControl.Filling
                         polygon.UpdateColorMatrix();
                     }
                     break;
-                case Interpolation.NormalVector:
+                case Shaders.Phong:
+                    break;
+                case Shaders.Const:
+                    var meanCoordinates = polygon.GetMeanCoordinates();
+                    var meanNormal = polygon.GetMeanNormal();
+                    var color = Pattern?.GetPixel(((int)meanCoordinates.X + Pattern.Width / 2) % Pattern.Width, ((int)meanCoordinates.Y + Pattern.Height / 2) % Pattern.Height).ToVector();
+                    polygon.ConstShaderColor = CalculateColorInPoint(meanCoordinates, meanNormal, color).ToColor();
+                    break;
+                default:
                     break;
             }
         }
 
         public Color GetColor(Polygon polygon, int x, int y)
         {
-            if(InterpolationMode == Interpolation.Color)
+            switch (ShadersType)
             {
-                return GetColorWithColorInterpolation(polygon, x, y);
-            }
-            else
-            {
-                return GetColorWithVectorInterpolation(polygon, x, y);
+                case Shaders.Gouraud:
+                    return GetColorWithColorInterpolation(polygon, x, y);
+                case Shaders.Phong:
+                    return GetColorWithVectorInterpolation(polygon, x, y);
+                case Shaders.Const:
+                    return polygon.ConstShaderColor;
+                default:
+                    return Color.Empty;
             }
         }
 

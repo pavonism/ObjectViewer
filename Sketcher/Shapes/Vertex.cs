@@ -12,8 +12,6 @@ namespace SketcherControl.Shapes
         public Vector4 GlobalLocation;
         public Vector4 Color { get; set; }
 
-        public event Action? RenderCoordinatesChanged;
-
         public Vertex(float x, float y, float z)
         {
             Location.X = x;
@@ -24,7 +22,7 @@ namespace SketcherControl.Shapes
             RenderLocation.Y = y;
         }
 
-        public void Transform(int width, int height, Matrix4x4 model, Matrix4x4 view, Matrix4x4 position)
+        public bool Transform(int width, int height, Matrix4x4 model, Matrix4x4 view, Matrix4x4 position)
         {
             Location.W = 1;
             var globalNormal = Vector3.TransformNormal(new Vector3(NormalVector.X, NormalVector.Y, NormalVector.Z), model);
@@ -32,13 +30,18 @@ namespace SketcherControl.Shapes
             GlobalLocation = Vector4.Transform(Location, model);
             RenderLocation = Vector4.Transform(GlobalLocation, view * position);
             RenderLocation /= RenderLocation.W;
+
+            if(Math.Abs(RenderLocation.X) > 1 || Math.Abs(RenderLocation.Y) > 1 || Math.Abs(RenderLocation.Z) > 1)
+                return false;
+
             RenderLocation.X *= width / 2;
             RenderLocation.Y *= height / 2;
             RenderLocation.X += width / 2;
             RenderLocation.Y += height / 2;
             Location.W = 0;
             GlobalLocation.W = 0;
-            RenderCoordinatesChanged?.Invoke();
+
+            return true;
         }
 
         public void Render(DirectBitmap canvas)
