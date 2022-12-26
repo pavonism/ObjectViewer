@@ -37,8 +37,8 @@ namespace SurfaceFiller
             InitializeToolbar();
             ArrangeComponents();
             InitializeForm();
-            LoadTextureSamples();
-            LoadNormalMapSamples();
+            //LoadTextureSamples();
+            //LoadNormalMapSamples();
         }
 
         private void InitializeScene()
@@ -55,6 +55,7 @@ namespace SurfaceFiller
             this.toolbar.AddDivider();
             this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, false);
             this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, true);
+            this.toolbar.AddSpacing();
             this.toolbar.AddDivider();
             this.toolbar.StartSection();
             this.toolbar.AddRadioOption(ConstShadersOptionHandler, Labels.ConstShaders);
@@ -70,6 +71,7 @@ namespace SurfaceFiller
             this.toolbar.AddSlider(CameraZHandler, Labels.CameraZ, Defaults.CameraZLocation);
             this.toolbar.EndSection();
             this.toolbar.AddComboPicker(CameraChangedHandler, this.cameras, this.cameras.First());
+            this.toolbar.AddSpacing();
             this.toolbar.AddDivider();
             this.toolbar.StartSection();
             this.toolbar.AddLabel(Labels.ShaderParameters);
@@ -77,12 +79,12 @@ namespace SurfaceFiller
             this.toolbar.AddFractSlider(KSParameterHandler, Labels.KSParameter, Defaults.KSParameter);
             this.toolbar.AddSlider(MParameterHandler, Labels.MParameter, Defaults.MParameter);
             this.toolbar.AddDivider();
-            this.toolbar.AddLabel(Labels.ObjectSurface);
-            this.objectSurfaceCombo = this.toolbar.AddComboImagePicker<Sample>(TexturePickedHandler);
-            this.toolbar.AddButton(ObjectColorButtonHandler, Glyphs.Palette, Hints.ChangeObjectColor);
-            this.toolbar.AddButton(LoadTextureHandlar, Glyphs.File, Hints.LoadObjectPattern);
-            this.normalMapCombo = this.toolbar.AddComboImagePicker<Sample>(NormalMapPickedHandler);
-            this.toolbar.AddButton(VectorMapHandler, Glyphs.File, Hints.LoadNormalMap);
+            //this.toolbar.AddLabel(Labels.ObjectSurface);
+            //this.objectSurfaceCombo = this.toolbar.AddComboImagePicker<Sample>(TexturePickedHandler);
+            //this.toolbar.AddButton(ObjectColorButtonHandler, Glyphs.Palette, Hints.ChangeObjectColor);
+            //this.toolbar.AddButton(LoadTextureHandlar, Glyphs.File, Hints.LoadObjectPattern);
+            //this.normalMapCombo = this.toolbar.AddComboImagePicker<Sample>(NormalMapPickedHandler);
+            //this.toolbar.AddButton(VectorMapHandler, Glyphs.File, Hints.LoadNormalMap);
             this.toolbar.EndSection();
         }
 

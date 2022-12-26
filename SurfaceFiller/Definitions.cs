@@ -23,7 +23,7 @@ namespace SurfaceFiller
         public const string NormalMapsAssets = @"..\..\..\..\Assets\NormalMaps";
         public const string ObjectAssets = @"..\..\..\..\Assets\Objects";
         public const string TorusFile = @"..\..\..\..\Assets\Objects\FullDonut.obj";
-        public const string DefaultObject = "Sphere";
+        public const string SphereFile = @"..\..\..\..\Assets\Objects\Sphere.obj";
 
         public static Color ThemeColor = Color.FromArgb(255, 0, 120, 215);
     }

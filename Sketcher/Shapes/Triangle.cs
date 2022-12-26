@@ -13,6 +13,16 @@ namespace SketcherControl.Shapes
         public bool IsVisible { get; private set; }
         private bool isInCube;
 
+        public Triangle(Triangle triangle)
+        {
+            Vertices = new Vertex[3];
+
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                AddVertex(new Vertex(triangle.Vertices[i]));
+            }
+        }
+
         public void AddVertex(Vertex vertex, Vector4? normalVector = null)
         {
             if (normalVector.HasValue)

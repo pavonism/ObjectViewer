@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace SketcherControl.Filling
+﻿namespace SketcherControl.Filling
 {
     public class ColorPickerDecorator : ColorPicker
     {

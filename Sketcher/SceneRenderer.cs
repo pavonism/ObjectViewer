@@ -56,6 +56,12 @@ namespace SketcherControl
                 tasks.Add(PrepareObjectAsync(obj, parameters));
             }
 
+            foreach (var light in scene.Lights)
+            {
+                if(light.Shape != null)
+                    tasks.Add(PrepareObjectAsync(light.Shape, parameters));
+            }
+
             Task.WaitAll(tasks.ToArray());
         }
 
@@ -80,6 +86,11 @@ namespace SketcherControl
             foreach (var obj in scene.Objects)
             {
                 obj.Render(bitmap, parameters.ShowLines, parameters.Fill ? scene.ColorPicker : null);
+            }
+
+            foreach (var light in scene.Lights)
+            {
+                light.Render(bitmap, parameters.ShowLines, parameters.Fill ? scene.ColorPicker : null);
             }
         }
     }

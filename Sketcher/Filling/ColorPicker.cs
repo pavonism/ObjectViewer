@@ -140,13 +140,13 @@ namespace SketcherControl.Filling
         #endregion
 
         #region Logic
-        public float InterpolateZ(Polygon polygon, int x, int y)
+        public virtual float InterpolateZ(Polygon polygon, int x, int y)
         {
             var coefficients = GetBarycentricCoefficients(polygon, x, y);
             return InterpolateZ(polygon, coefficients);
         }
 
-        public void StartFillingTriangle(Polygon polygon)
+        public virtual void StartFillingTriangle(Polygon polygon)
         {
             switch (ShadersType)
             {
@@ -172,7 +172,7 @@ namespace SketcherControl.Filling
             }
         }
 
-        public Color GetColor(Polygon polygon, int x, int y)
+        public virtual Color GetColor(Polygon polygon, int x, int y)
         {
             switch (ShadersType)
             {

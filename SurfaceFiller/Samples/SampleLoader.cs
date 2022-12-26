@@ -33,22 +33,6 @@ namespace SurfaceFiller.Samples
             return samples;
         }
 
-        public static IEnumerable<BasicSample> GetObjectSamples(string directory)
-        {
-            List<BasicSample> samples = new();
-
-            foreach (string fileName in Directory.GetFiles(directory, "*.obj"))
-            {
-                var sample = new ObjectSample(fileName, Path.GetFileNameWithoutExtension(fileName));
-                if(sample.Name == Resources.DefaultObject)
-                    samples.Insert(0, sample);
-                else 
-                    samples.Add(sample);
-            }
-
-            return samples;
-        }
-
         public static PictureSample GetSample(string path)
         {
             Bitmap bmp = new Bitmap(Image.FromFile(path));

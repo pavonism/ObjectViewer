@@ -244,7 +244,7 @@ namespace SurfaceFiller.Components
             var radio = new RadioButton()
             {
                 Text = label,
-                Width = this.Width,
+                Width = this.Width - Margin.Left - Margin.Right,
             };
 
             if (selected.HasValue)

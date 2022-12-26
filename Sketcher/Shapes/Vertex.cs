@@ -22,6 +22,16 @@ namespace SketcherControl.Shapes
             RenderLocation.Y = y;
         }
 
+        public Vertex(Vertex vertex)
+        {
+            Location = vertex.Location;
+            NormalVector = vertex.NormalVector;
+            GlobalNormalVector = vertex.GlobalNormalVector;
+            RenderLocation = vertex.RenderLocation;
+            GlobalLocation = vertex.GlobalLocation;
+            Color = vertex.Color;
+        }
+
         public bool Transform(int width, int height, Matrix4x4 model, Matrix4x4 view, Matrix4x4 position)
         {
             Location.W = 1;

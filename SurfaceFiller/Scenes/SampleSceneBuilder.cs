@@ -1,4 +1,5 @@
-﻿using SketcherControl.SceneManipulation;
+﻿using SketcherControl.Filling;
+using SketcherControl.SceneManipulation;
 using SurfaceFiller;
 using System.Numerics;
 
@@ -34,20 +35,31 @@ namespace ObjectViewer.Scenes
         public override Scene Build()
         {
             Scene scene = new();
-            var torusData = scene.LoadObjectDataFromFile(Resources.TorusFile);
+            ObjectLoader loader = new();
+
+            var sphere = loader.LoadObjectFromFile(Resources.SphereFile);
+            var lightSource = new LightSource();
+            sphere.Rotate(Matrix4x4.CreateRotationX((float)Math.PI));
+            sphere.SetScale(0.1f);
+            lightSource.Shape = sphere;
+            scene.AddLightSource(lightSource);
+
+            var torusData = loader.LoadObjectFromFile(Resources.TorusFile);
 
             for (int i = 0; i < fixedObjectsCount; i++)
             {
                 float X = radius * (float)Math.Cos(i * 2 * Math.PI / fixedObjectsCount);
                 float Y = radius * (float)Math.Sin(i * 2 * Math.PI / fixedObjectsCount);
-                var torus = scene.AddObjectFromStringData(torusData);
+                var torus = loader.MakeCopy(torusData);
                 torus.MoveTo(X, Y, 0);
+                scene.AddObject(torus);
             }
 
-            var animatedTorus = scene.AddObjectFromStringData(torusData);
+            var animatedTorus = torusData;
             animatedTorus.Animation = new SampleAnimation();
             scene.MovingObject = animatedTorus;
-
+            scene.AddObject(animatedTorus);
+            
             return scene;
         }
     }
