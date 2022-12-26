@@ -9,6 +9,7 @@ namespace SurfaceFiller
         public const float KSParameter = 0.3f;
         public const float MParameter = 0.5f;
 
+        public const float ViewDistance = 0.5f;
         public const float FOV = 0.75f;
         public const float CameraXLocation = 0.9f;
         public const float CameraYLocation = 0.9f;
@@ -49,10 +50,12 @@ namespace SurfaceFiller
         public const string ThreadSlider = "Threads";
         public const string ShowLinesOption = "Pokaż linie";
         public const string FillObjectsOption = "Wypełnianie obiektów";
-        public const string PhongShaders = "Cieniowanie Phonga";
-        public const string GouraudShaders = "Cieniowanie Gourauda";
-        public const string ConstShaders = "Cieniowanie płaskie";
+        public const string Shaders = "Cieniowania";
+        public const string PhongShader = "Cieniowanie Phonga";
+        public const string GouraudShader = "Cieniowanie Gourauda";
+        public const string ConstShader = "Cieniowanie płaskie";
         public const string Camera = "Kamera";
+        public const string Fog = "Mgła";
         public const string CameraX = "X";
         public const string CameraY = "Y";
         public const string CameraZ = "Z";
@@ -68,6 +71,7 @@ namespace SurfaceFiller
         public const string FirstPersonCamera = "Kamera pierwszoosobowa";
         public const string ThirdPersonCamera = "Kamera trzecioosobowa";
         public const string FreeCamera = "Kamera swobodna";
+        public static string SolidShader = "Bez cieniowania";
     }
 
     public static class Glyphs

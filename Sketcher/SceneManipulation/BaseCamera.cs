@@ -33,7 +33,7 @@ namespace SketcherControl.SceneManipulation
             UpdatePositionMatrix(newWidth, newHeight);
         }
 
-        public Vector3 GetCameraVector()
+        public virtual Vector3 GetCameraVector()
         {
             return cameraVector;
         }
@@ -149,6 +149,11 @@ namespace SketcherControl.SceneManipulation
         public override Vector3 GetLookVector()
         {
             return -sceneViewer.CameraVector;
+        }
+
+        public override Vector3 GetCameraVector()
+        {
+            return sceneViewer.CameraVector;
         }
     }
 }

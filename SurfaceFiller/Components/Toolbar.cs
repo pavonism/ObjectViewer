@@ -153,7 +153,7 @@ namespace SurfaceFiller.Components
             return button;
         }
 
-        public CheckBox AddOption(EventHandler onOptionChanged, string text, string? hint = null, bool defaultValue = false)
+        public CheckBox AddOption(Action<bool> onOptionChanged, string text, string? hint = null, bool defaultValue = false)
         {
             var checkBox = new CheckBox()
             {
@@ -172,7 +172,7 @@ namespace SurfaceFiller.Components
 
             AddTooltip(checkBox, hint);
 
-            checkBox.CheckedChanged += onOptionChanged;
+            checkBox.CheckedChanged += (s, e) => onOptionChanged(checkBox.Checked);
             checkBox.Checked = defaultValue;
             AddControl(table);
             return checkBox;

@@ -1,20 +1,9 @@
-﻿using SketcherControl.SceneManipulation;
+﻿using SketcherControl.Filling;
 using SketcherControl.Shapes;
 using System.Numerics;
 
-namespace SketcherControl
+namespace SketcherControl.SceneManipulation
 {
-    internal class SceneRenderParameters
-    {
-        public Matrix4x4 View { get; set; }
-        public Matrix4x4 Position { get; set; }
-        public int ViewWidth { get; set; }
-        public int ViewHeight { get; set; }
-        public Vector3 LookVector { get; set; }
-        public bool ShowLines { get; set; }
-        public bool Fill { get; set; }
-    }
-
     internal class SceneRenderer
     {
         public event Action<DirectBitmap>? RenderFinished;
@@ -58,7 +47,7 @@ namespace SketcherControl
 
             foreach (var light in scene.Lights)
             {
-                if(light.Shape != null)
+                if (light.Shape != null)
                     tasks.Add(PrepareObjectAsync(light.Shape, parameters));
             }
 
@@ -83,14 +72,39 @@ namespace SketcherControl
 
         public void PaintScene(DirectBitmap bitmap, Scene scene, SceneRenderParameters parameters)
         {
+            IPixelProcessor? processor = null;
+            Shader shader = scene.Shader;
+
+            if(parameters.Fill)
+            {
+                if (parameters.Fog)
+                    processor = new PixelPainterWithFog(bitmap, scene.Shader, parameters.CameraVector);
+                else
+                    processor = new PixelPainter(bitmap, scene.Shader);
+            }
+
             foreach (var obj in scene.Objects)
             {
-                obj.Render(bitmap, parameters.ShowLines, parameters.Fill ? scene.ColorPicker : null);
+                scene.Shader?.Initialize(obj, scene.Lights);
+                obj.Render(bitmap, parameters.CameraVector, parameters.ShowLines, processor);
+            }
+
+            shader = new SolidShader();
+            if (processor != null)
+            {
+                if (parameters.Fog)
+                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector);
+                else
+                    processor = new PixelPainter(bitmap, shader);
             }
 
             foreach (var light in scene.Lights)
             {
-                light.Render(bitmap, parameters.ShowLines, parameters.Fill ? scene.ColorPicker : null);
+                if(light.Shape != null)
+                {
+                    shader.Initialize(light.Shape, Enumerable.Empty<LightSource>());
+                    light.Shape.Render(bitmap, parameters.CameraVector, parameters.ShowLines, processor);
+                }
             }
         }
     }

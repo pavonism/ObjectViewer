@@ -56,5 +56,51 @@ namespace SketcherControl.Geometrics
 
             return new Vector3(w, u, v);
         }
+
+        public static float InterpolateX(Polygon polygon, Vector3 coefficients)
+        {
+            return polygon.Vertices[0].GlobalLocation.X * coefficients.Y + polygon.Vertices[1].GlobalLocation.X * coefficients.Z + polygon.Vertices[2].GlobalLocation.X * coefficients.X;
+        }
+
+        public static float InterpolateY(Polygon polygon, Vector3 coefficients)
+        {
+            return polygon.Vertices[0].GlobalLocation.Y * coefficients.Y + polygon.Vertices[1].GlobalLocation.Y * coefficients.Z + polygon.Vertices[2].GlobalLocation.Y * coefficients.X;
+        }
+
+        public static float InterpolateZ(Polygon polygon, Vector3 coefficients)
+        {
+            return polygon.Vertices[0].RenderLocation.Z * coefficients.Y + polygon.Vertices[1].RenderLocation.Z * coefficients.Z + polygon.Vertices[2].RenderLocation.Z * coefficients.X;
+        }
+
+        public static float InterpolateX(Polygon polygon, int x, int y)
+        {
+            var coefficients = GetBarycentricCoefficients(polygon, x, y);
+            return InterpolateX(polygon, coefficients);
+        }
+
+        public static float InterpolateY(Polygon polygon, int x, int y)
+        {
+            var coefficients = GetBarycentricCoefficients(polygon, x, y);
+            return InterpolateY(polygon, coefficients);
+        }
+
+        public static float InterpolateZ(Polygon polygon, int x, int y)
+        {
+            var coefficients = GetBarycentricCoefficients(polygon, x, y);
+            return InterpolateZ(polygon, coefficients);
+        }
+
+        public static Vector3 GetBarycentricCoefficients(Polygon polygon, int x, int y)
+        {
+            Vector3 coefficients;
+
+            if (!polygon.CoefficientsCache.TryGetValue((x, y), out coefficients))
+            {
+                coefficients = CalculateCoefficients(polygon, x, y);
+            }
+
+            return coefficients;
+        }
+
     }
 }

@@ -52,6 +52,18 @@ namespace SketcherControl.Shapes
             return mean / this.Vertices.Length;
         }
 
+        public Vector4 GetMeanRenderCoordinates()
+        {
+            Vector4 mean = new();
+
+            foreach (var vertex in Vertices)
+            {
+                mean += vertex.RenderLocation;
+            }
+
+            return mean / this.Vertices.Length;
+        }
+
         public virtual void GetMaxPoints(out Point max, out Point min)
         {
             var maxPoint = new PointF(float.MinValue, float.MinValue);

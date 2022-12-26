@@ -1,5 +1,6 @@
 ﻿using SketcherControl.Geometrics;
 using SketcherControl.Shapes;
+using System.Numerics;
 
 namespace SketcherControl.Filling
 {
@@ -24,12 +25,45 @@ namespace SketcherControl.Filling
     public class PixelPainter : IPixelProcessor
     {
         DirectBitmap bitmap;
-        IColorPicker colorPicker;
+        IShader shader;
 
-        public PixelPainter(DirectBitmap bitmap, ColorPicker colorPicker)
+        public PixelPainter(DirectBitmap bitmap, Shader shader)
+        {
+            this.bitmap = bitmap;
+            this.shader = shader;
+        }
+
+        public void StartProcessing(Polygon polygon)
+        {
+            shader.StartFillingTriangle(polygon);
+        }
+
+        public void Process(Polygon polygon, int x, int y)
+        {
+            var interpolatedZ = Interpolator.InterpolateZ(polygon, x, y);
+            if (interpolatedZ > bitmap.GetZ(x, y))
+                return;
+
+            var lightColor = this.shader.GetColor(polygon, x, y);
+            bitmap.SetZ(x, y, interpolatedZ);
+            bitmap.SetPixel(x, y, lightColor);
+        }
+    }
+
+    public class PixelPainterWithFog : IPixelProcessor
+    {
+        DirectBitmap bitmap;
+        IShader colorPicker;
+        Vector4 fogColor = new Vector4(1, 1, 1, 0);
+        Vector3 cameraVector;
+        float fogDEnd = 10;
+        float fogDStart = 0;
+
+        public PixelPainterWithFog(DirectBitmap bitmap, Shader colorPicker, Vector3 cameraVector)
         {
             this.bitmap = bitmap;
             this.colorPicker = colorPicker;
+            this.cameraVector = cameraVector;
         }
 
         public void StartProcessing(Polygon polygon)
@@ -39,13 +73,37 @@ namespace SketcherControl.Filling
 
         public void Process(Polygon polygon, int x, int y)
         {
-            var interpolatedZ = colorPicker.InterpolateZ(polygon, x, y);
+            var interpolatedZ = Interpolator.InterpolateZ(polygon, x, y);
             if (interpolatedZ > bitmap.GetZ(x, y))
                 return;
 
+            var interpolatedX = Interpolator.InterpolateX(polygon, x, y);
+            var interpolatedY = Interpolator.InterpolateY(polygon, x, y);
+
+            Vector3 location = new()
+            {
+                X = interpolatedX,
+                Y = interpolatedY,
+                Z = interpolatedZ
+            };
+
+            var distance = (location - cameraVector).Length();
+
+            if (distance > fogDEnd)
+                return;
+
             var lightColor = this.colorPicker.GetColor(polygon, x, y);
+            var fogCoefficient = CalculateDistanceCoefficient(distance);
+            var colorWithFog = (fogCoefficient * lightColor.ToVector() + (1 - fogCoefficient) * fogColor).ToColor();
+
             bitmap.SetZ(x, y, interpolatedZ);
-            bitmap.SetPixel(x, y, lightColor);
+            bitmap.SetPixel(x, y, colorWithFog);
+        }
+
+
+        private float CalculateDistanceCoefficient(float d)
+        {
+            return (fogDEnd - d) / (fogDEnd - fogDStart);
         }
     }
 

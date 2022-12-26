@@ -18,7 +18,9 @@ namespace SketcherControl.Shapes
         public Matrix4x4 Scale { get; protected set; } = Matrix4x4.Identity;
         public IEnumerable<Triangle> Triangles => this.triangles;
 
-        private Color color;
+        public Color Color { get; set; }
+        public virtual DirectBitmap? Texture { get; set; }
+        public virtual DirectBitmap? NormalMap { get; set; }
 
         public IAnimation? Animation { get; set; }
         public Vector3 ObjectSize { get; private set; }
@@ -30,9 +32,9 @@ namespace SketcherControl.Shapes
             this.objectIndx = objectIndx;
 
             if (this.objectIndx % 2 == 0)
-                this.color = SketcherConstants.ThemeColor;
+                this.Color = SketcherConstants.ThemeColor;
             else
-                this.color = Color.MediumPurple;
+                this.Color = Color.MediumPurple;
         }
 
         public Object3()
@@ -47,17 +49,16 @@ namespace SketcherControl.Shapes
             }
         }
 
-        public void RenderWithPicker(DirectBitmap bitmap, bool showLines = true, ColorPicker? colorPicker = null)
+        public void Render(DirectBitmap bitmap, Vector3 cameraVector, bool showLines = true, IPixelProcessor? pixelProcessor = null)
         {
-            if (colorPicker != null)
+            if (pixelProcessor != null)
             {
-                PixelPainter pixelPainter = new(bitmap, colorPicker);
 
                 if (RenderThreads == 1)
                 {
                     foreach (var triangle in this.triangles)
                     {
-                        ScanLine.Run(triangle, pixelPainter);
+                        ScanLine.Run(triangle, pixelProcessor);
                     }
                 }
                 else
@@ -67,7 +68,7 @@ namespace SketcherControl.Shapes
 
                     for (int i = 0; i < RenderThreads; i++)
                     {
-                        tasks.Add(FillAsync(pixelPainter, i * trianglesPerThread, trianglesPerThread));
+                        tasks.Add(FillAsync(pixelProcessor, i * trianglesPerThread, trianglesPerThread));
                     }
 
                     Task.WaitAll(tasks.ToArray());
@@ -83,14 +84,7 @@ namespace SketcherControl.Shapes
             }
         }
 
-
-        public void Render(DirectBitmap bitmap, bool showLines = true, ColorPicker? colorPicker = null)
-        {
-            var colorPickerWithTargetColor = colorPicker != null ? new TargetColorColorPickerDecorator(colorPicker, this.color) : null;
-            RenderWithPicker(bitmap, showLines, colorPickerWithTargetColor);
-        }
-
-        private Task FillAsync(PixelPainter painter, int start, int step)
+        private Task FillAsync(IPixelProcessor painter, int start, int step)
         {
             return Task.Run(
                 () =>

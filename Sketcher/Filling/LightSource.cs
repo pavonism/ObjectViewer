@@ -9,6 +9,7 @@ namespace SketcherControl.Filling
         #region Fields and Events
         public event Action? LightSourceChanged;
 
+        private SolidShader shader = new();
         private Object3? shape;
 
         public Object3? Shape
@@ -19,32 +20,64 @@ namespace SketcherControl.Filling
                 if(this.shape != value) 
                 {
                     this.shape = value;
-                    value?.MoveTo(SceneLocation.X, SceneLocation.Y, SceneLocation.Z);
+                    if(this.shape != null)
+                    {
+                        this.shape.Color = this.color;
+                        this.shape.MoveTo(SceneLocation.X, SceneLocation.Y, SceneLocation.Z);
+                    }
                 }
             }
         }
-        private Vector4 lightSourceColor = new Vector4(0.5f, 1, 1, 0);
+        private Vector4 sceneLocation;
+        private Vector4 colorVector;
+        private Color color;
         #endregion
 
         #region Properties
         public float MinZ { get; set; } = 0;
-        public Vector4 SceneLocation { get; set; } = new Vector4(0, 0, 4, 0);
-        public bool Show { get; set; }
-
-        public Color LightSourceColor
+        public Vector4 SceneLocation
         {
-            get => this.lightSourceColor.ToColor();
+            get => this.sceneLocation;
             set
             {
-                if (this.lightSourceColor.ToColor() == value)
-                    return;
+                if(this.sceneLocation != value)
+                {
+                    this.sceneLocation = value;
+                    Shape?.MoveTo(sceneLocation.X, sceneLocation.Y, sceneLocation.Z);
+                }
+            }
+        }
+        public bool Show { get; set; }
 
-                this.lightSourceColor = value.ToVector();
-                this.LightSourceChanged?.Invoke();
+        public Color Color
+        {
+            get => this.color;
+            set
+            {
+                this.color = value;
+                this.colorVector = value.ToVector();
+                
+                if(Shape!= null)
+                {
+                    Shape.Color = value;
+                }
             }
         }
 
-        public Vector4 LightSourceVector => this.lightSourceColor;
+        public Vector4 ColorVector
+        {
+            get => this.colorVector;
+            set
+            {
+                this.colorVector = value;
+                this.color = value.ToColor();
+
+                if (Shape != null)
+                {
+                    Shape.Color = this.color;
+                }
+            }
+        }
         #endregion Properties
 
         #region Initialization
@@ -52,35 +85,5 @@ namespace SketcherControl.Filling
         {
         }
         #endregion
-
-        #region Rendering
-        public void Render(DirectBitmap bitmap, bool showLines = true, ColorPicker? colorPicker = null)
-        {
-            if(Shape != null)
-            {
-                var picker = colorPicker != null ? new LightSourceColorPicker(colorPicker, LightSourceColor) : null;
-                Shape.RenderWithPicker(bitmap, showLines, picker);
-            }
-        }
-        #endregion
-    }
-
-    public class LightSourceColorPicker : ColorPickerDecorator
-    {
-        private Color lightColor;
-
-        public LightSourceColorPicker(ColorPicker colorPicker, Color lightColor) : base(colorPicker)
-        {
-            this.lightColor = lightColor;
-        }
-
-        public override Color GetColor(Polygon polygon, int x, int y)
-        {
-            return lightColor;
-        }
-
-        public override void StartFillingTriangle(Polygon polugon)
-        {
-        }
     }
 }

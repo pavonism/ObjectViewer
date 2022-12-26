@@ -32,6 +32,20 @@ namespace SketcherControl
         private int frames;
         private int fps;
 
+        private bool fog;
+        public bool Fog
+        {
+            get => this.fog;
+            set
+            {
+                if (this.fog != value)
+                {
+                    this.fog = value;
+                    UpdateView();
+                }
+            }
+        }
+
         private float fov = (float)Math.PI / 6;
         public float FOV
         {
@@ -140,8 +154,10 @@ namespace SketcherControl
                 ViewWidth = Width,
                 ViewHeight = Height,
                 LookVector = Camera.GetLookVector(),
+                CameraVector = Camera.GetCameraVector(),
                 ShowLines = ShowLines,
-                Fill = Fill
+                Fill = Fill,
+                Fog = Fog,
             };
 
             this.renderer.Render(Scene, renderParameters);
