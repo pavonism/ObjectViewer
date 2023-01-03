@@ -1,4 +1,5 @@
 ﻿using SketcherControl.Filling;
+using SketcherControl.Geometrics;
 using SketcherControl.Shapes;
 using System.Numerics;
 
@@ -29,7 +30,7 @@ namespace SketcherControl.SceneManipulation
         {
             return Task.Run(() =>
             {
-                var directBitmap = PrepareBitmap(parameters.ViewWidth, parameters.ViewHeight);
+                var directBitmap = PrepareBitmap(parameters.ViewWidth, parameters.ViewHeight, parameters.Background);
                 PrepareScene(scene, parameters);
                 PaintScene(directBitmap, scene, parameters);
                 return directBitmap;
@@ -64,13 +65,13 @@ namespace SketcherControl.SceneManipulation
             });
         }
 
-        private DirectBitmap PrepareBitmap(int width, int height)
+        private DirectBitmap PrepareBitmap(int width, int height, Color backgroundColor)
         {
             var bitmap = new DirectBitmap(width, height);
 
             using(var g = Graphics.FromImage(bitmap.Bitmap))
             {
-                g.Clear(Color.Black);
+                g.Clear(backgroundColor);
             }
 
             return bitmap;
@@ -84,7 +85,7 @@ namespace SketcherControl.SceneManipulation
             if(parameters.Fill)
             {
                 if (parameters.Fog)
-                    processor = new PixelPainterWithFog(bitmap, scene.Shader, parameters.CameraVector);
+                    processor = new PixelPainterWithFog(bitmap, scene.Shader, parameters.CameraVector, parameters.Background.ToVector());
                 else
                     processor = new PixelPainter(bitmap, scene.Shader);
             }
@@ -99,7 +100,7 @@ namespace SketcherControl.SceneManipulation
             if (processor != null)
             {
                 if (parameters.Fog)
-                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector);
+                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, parameters.Background.ToVector());
                 else
                     processor = new PixelPainter(bitmap, shader);
             }

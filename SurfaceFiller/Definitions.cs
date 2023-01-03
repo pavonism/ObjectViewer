@@ -71,7 +71,9 @@ namespace SurfaceFiller
         public const string FirstPersonCamera = "Kamera pierwszoosobowa";
         public const string ThirdPersonCamera = "Kamera trzecioosobowa";
         public const string FreeCamera = "Kamera swobodna";
-        public static string SolidShader = "Bez cieniowania";
+        public const string SolidShader = "Bez cieniowania";
+        public const string Day = "Dzień";
+        public const string Night = "Noc";
     }
 
     public static class Glyphs

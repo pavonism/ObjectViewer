@@ -69,6 +69,10 @@ namespace SurfaceFiller
             this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, false);
             this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, true);
             this.toolbar.AddOption(FogHandler, Labels.Fog);
+            this.toolbar.StartSection();
+            this.toolbar.AddRadioOption(DayRadioHandler, Labels.Day, null, true);
+            this.toolbar.AddRadioOption(NightRadioHandler, Labels.Night);
+            this.toolbar.EndSection();
             this.toolbar.AddSpacing();
             this.toolbar.AddDivider();
             this.toolbar.AddLabel(Labels.Shaders);
@@ -94,11 +98,6 @@ namespace SurfaceFiller
             this.toolbar.EndSection();
         }
 
-        private void FogHandler(bool value)
-        {
-            this.sceneViewer.Fog = value;
-        }
-
         private void InitializeForm()
         {
             this.Text = Resources.ProgramTitle;
@@ -119,6 +118,21 @@ namespace SurfaceFiller
         #endregion
 
         #region Handlers 
+        private void NightRadioHandler(object? sender, EventArgs e)
+        {
+            this.sceneViewer.NightMode = true;
+        }
+
+        private void DayRadioHandler(object? sender, EventArgs e)
+        {
+            this.sceneViewer.NightMode = false;
+        }
+
+        private void FogHandler(bool value)
+        {
+            this.sceneViewer.Fog = value;
+        }
+
         private void ShaderChangedHandler(ShaderSample shaderSample)
         {
             this.scene.Shader = shaderSample.Shader;

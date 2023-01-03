@@ -18,6 +18,7 @@ namespace SketcherControl.SceneManipulation
         public bool ShowLines { get; set; }
         public bool Fill { get; set; }
         public bool Fog { get; set; }
+        public Color Background { get; set; }
     }
 
 }

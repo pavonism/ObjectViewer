@@ -54,16 +54,17 @@ namespace SketcherControl.Filling
     {
         DirectBitmap bitmap;
         IShader colorPicker;
-        Vector4 fogColor = new Vector4(1, 1, 1, 0);
+        Vector4 backgroundColor = new Vector4(1, 1, 1, 0);
         Vector3 cameraVector;
         float fogDEnd = 10;
         float fogDStart = 0;
 
-        public PixelPainterWithFog(DirectBitmap bitmap, Shader colorPicker, Vector3 cameraVector)
+        public PixelPainterWithFog(DirectBitmap bitmap, Shader colorPicker, Vector3 cameraVector, Vector4 backgroundColor)
         {
             this.bitmap = bitmap;
             this.colorPicker = colorPicker;
             this.cameraVector = cameraVector;
+            this.backgroundColor = backgroundColor;
         }
 
         public void StartProcessing(Polygon polygon)
@@ -94,7 +95,7 @@ namespace SketcherControl.Filling
 
             var lightColor = this.colorPicker.GetColor(polygon, x, y);
             var fogCoefficient = CalculateDistanceCoefficient(distance);
-            var colorWithFog = (fogCoefficient * lightColor.ToVector() + (1 - fogCoefficient) * fogColor).ToColor();
+            var colorWithFog = (fogCoefficient * lightColor.ToVector() + (1 - fogCoefficient) * backgroundColor).ToColor();
 
             bitmap.SetZ(x, y, interpolatedZ);
             bitmap.SetPixel(x, y, colorWithFog);

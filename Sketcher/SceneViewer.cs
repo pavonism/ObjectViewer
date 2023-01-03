@@ -1,4 +1,5 @@
-﻿using SketcherControl.SceneManipulation;
+﻿using SketcherControl.Geometrics;
+using SketcherControl.SceneManipulation;
 using System.Numerics;
 using Timer = System.Windows.Forms.Timer;
 
@@ -8,9 +9,12 @@ namespace SketcherControl
     {
         private DirectBitmap sceneView;
         private SceneRenderer renderer;
-        private Timer rotationTimer;
+        private Timer renderTimer;
         private Timer fpsTimer;
-
+        Timer dayNightTimer;
+        private Vector3 backgroundColor = new Vector3(1, 1, 1);
+        private DayNightCycle dayNightCycle;
+        
         public Scene Scene { get; private set; }
         public Matrix4x4 View { get; set; }
         public Matrix4x4 Position { get; set; }
@@ -74,10 +78,52 @@ namespace SketcherControl
             }
         }
 
-        public int RenderThreads { get; set; }
+        private bool nightMode;
+        public bool NightMode
+        {
+            get => this.nightMode;
+            set
+            {
+                if(this.nightMode != value)
+                {
+                    this.nightMode = value;
+                    dayNightCycle = value ? DayNightCycle.DayToNight : DayNightCycle.NightToDay;
+                    this.dayNightTimer.Start();
+                    UpdateBackground();
+                    UpdateView();
+                }
+            }
+        }
+
+        private void UpdateBackground()
+        {
+            switch (dayNightCycle)
+            {
+                case DayNightCycle.NightToDay:
+                    if (backgroundColor.X == 0)
+                        backgroundColor = new Vector3(0.01f, 0.01f, 0.01f);
+                    if (backgroundColor.X >= 1)
+                    {
+                        dayNightCycle = DayNightCycle.Night;
+                        this.dayNightTimer.Stop();
+                    }
+                    backgroundColor *= 1.05f;
+                    break;
+                case DayNightCycle.DayToNight:
+                    backgroundColor /= 1.05f;
+                    if (backgroundColor.X < 0.01f)
+                    {
+                        backgroundColor = new Vector3(0, 0, 0);
+                        dayNightCycle = DayNightCycle.Day;
+                        this.dayNightTimer.Stop();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
         public bool Fill { get; set; } = false;
-
         public bool ShowLines { get; set; } = false;
 
         public SceneViewer(Scene scene)
@@ -90,18 +136,27 @@ namespace SketcherControl
 
             this.Image = this.sceneView.Bitmap;
 
-            this.rotationTimer = new();
-            this.rotationTimer.Interval = 1;
-            this.rotationTimer.Tick += RotationTimer_Tick;
-            this.rotationTimer.Start();
+            this.renderTimer = new();
+            this.renderTimer.Interval = 1;
+            this.renderTimer.Tick += RenderTimer_Tick;
+            this.renderTimer.Start();
 
             this.fpsTimer = new();
             this.fpsTimer.Interval = 1000;
             this.fpsTimer.Tick += FpsTimer_Tick;
             this.fpsTimer.Start();
 
+            this.dayNightTimer = new();
+            this.dayNightTimer.Interval = 40;
+            this.dayNightTimer.Tick += DayNightTimer_Tick;
+
             var camera = new BaseCamera();
             camera.Apply(this);
+        }
+
+        private void DayNightTimer_Tick(object? sender, EventArgs e)
+        {
+            UpdateBackground();
         }
 
         #region Event Handlers
@@ -128,7 +183,7 @@ namespace SketcherControl
             this.frames = 0;
         }
 
-        private void RotationTimer_Tick(object? sender, EventArgs e)
+        private void RenderTimer_Tick(object? sender, EventArgs e)
         {
             RefreshView();
         }
@@ -146,7 +201,6 @@ namespace SketcherControl
             if (Scene.IsEmpty)
                 return;
 
-
             SceneRenderParameters renderParameters = new()
             {
                 View = Camera.GetViewMatrix(),
@@ -158,6 +212,7 @@ namespace SketcherControl
                 ShowLines = ShowLines,
                 Fill = Fill,
                 Fog = Fog,
+                Background = backgroundColor.ToColor()
             };
 
             this.renderer.Render(Scene, renderParameters);
@@ -179,12 +234,12 @@ namespace SketcherControl
 
         public void Freeze()
         {
-            this.rotationTimer.Stop();
+            this.renderTimer.Stop();
         }
 
         public void Thaw()
         {
-            this.rotationTimer.Start();
+            this.renderTimer.Start();
         }
 
         private float speed = 0.1f;
@@ -227,5 +282,13 @@ namespace SketcherControl
             }
         }
         #endregion
+
+        private enum DayNightCycle
+        {
+            DayToNight,
+            NightToDay,
+            Day, 
+            Night
+        }
     }
 }
