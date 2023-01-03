@@ -67,6 +67,12 @@ namespace SketcherControl.SceneManipulation
         private DirectBitmap PrepareBitmap(int width, int height)
         {
             var bitmap = new DirectBitmap(width, height);
+
+            using(var g = Graphics.FromImage(bitmap.Bitmap))
+            {
+                g.Clear(Color.Black);
+            }
+
             return bitmap;
         }
 
@@ -102,7 +108,7 @@ namespace SketcherControl.SceneManipulation
             {
                 if(light.Shape != null)
                 {
-                    shader.Initialize(light.Shape, Enumerable.Empty<LightSource>());
+                    shader.Initialize(light.Shape, Enumerable.Empty<Light>());
                     light.Shape.Render(bitmap, parameters.CameraVector, parameters.ShowLines, processor);
                 }
             }

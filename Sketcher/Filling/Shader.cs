@@ -10,13 +10,13 @@ namespace SketcherControl.Filling
         public event Action? ParametersChanged;
         private Vector4 v = new(0, 0, 1, 0);
 
-        private List<LightSource> lights = new();
+        private List<Light> lights = new();
         public ShaderParameters Parameters { get; set; } = new();
         protected Object3 target;
         #endregion
 
         #region Initialization
-        public void Initialize(Object3 obj, IEnumerable<LightSource> lightSources)
+        public void Initialize(Object3 obj, IEnumerable<Light> lightSources)
         {
             this.target = obj;
             this.lights.Clear();
@@ -62,8 +62,10 @@ namespace SketcherControl.Filling
 
                 var angleVR = Vector4.Dot(v, R);
                 if (angleVR < 0) angleVR = 0;
-                result += (Parameters.KD * IL * IO * angleNL) + (Parameters.KS * IL * IO * (float)Math.Pow(angleVR, Parameters.M));
+                var lightresult = (Parameters.KD * IL * IO * angleNL) + (Parameters.KS * IL * IO * (float)Math.Pow(angleVR, Parameters.M));
+                result += light.AdjustColorFromShader(lightresult, location);
             }
+
             return result.Cut();
         }
 

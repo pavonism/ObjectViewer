@@ -7,11 +7,11 @@ namespace SketcherControl.SceneManipulation
     {
         #region Fields and Properties
         private List<Object3> objects;
-        private List<LightSource> lightSources;
-        public LightSource LightSource => this.lightSources.First();
+        private List<Light> lightSources;
+        public Light LightSource => this.lightSources.First();
 
         public IEnumerable<Object3> Objects => objects.ToList();
-        public IEnumerable<LightSource> Lights => lightSources.ToList();
+        public IEnumerable<Light> Lights => lightSources.ToList();
         public bool IsEmpty => !objects.Any();
         public Object3 MovingObject { get; set; }
 
@@ -46,7 +46,7 @@ namespace SketcherControl.SceneManipulation
             SendSceneChanged();
         }
 
-        public void AddLightSource(LightSource lightSource)
+        public void AddLightSource(Light lightSource)
         {
             this.lightSources.Add(lightSource);
             lightSource.LightSourceChanged += ParametersChangedHandler;

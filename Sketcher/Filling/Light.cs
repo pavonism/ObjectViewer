@@ -4,14 +4,12 @@ using System.Numerics;
 
 namespace SketcherControl.Filling
 {
-    public class LightSource
+    public class Light
     {
         #region Fields and Events
         public event Action? LightSourceChanged;
 
-        private SolidShader shader = new();
         private Object3? shape;
-
         public Object3? Shape
         {
             get => this.shape;
@@ -81,9 +79,14 @@ namespace SketcherControl.Filling
         #endregion Properties
 
         #region Initialization
-        public LightSource()
+        public Light()
         {
         }
         #endregion
+
+        public virtual Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation)
+        {
+            return shaderColor;
+        }
     }
 }
