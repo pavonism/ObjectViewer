@@ -19,6 +19,7 @@ namespace SketcherControl.SceneManipulation
         public bool Fill { get; set; }
         public bool Fog { get; set; }
         public Color Background { get; set; }
+        public float ViewDistance { get; set; }
     }
 
 }

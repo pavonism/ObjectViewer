@@ -11,10 +11,14 @@ namespace SketcherControl
         private SceneRenderer renderer;
         private Timer renderTimer;
         private Timer fpsTimer;
-        Timer dayNightTimer;
+        private Timer dayNightTimer;
+        private Timer fogTimer;
+
+
         private Vector3 backgroundColor = new Vector3(1, 1, 1);
-        private DayNightCycle dayNightCycle;
-        
+        private SwitchState nightModeCycle;
+        private SwitchState fogCycle;
+
         public Scene Scene { get; private set; }
         public Matrix4x4 View { get; set; }
         public Matrix4x4 Position { get; set; }
@@ -36,17 +40,18 @@ namespace SketcherControl
         private int frames;
         private int fps;
 
+        private float viewDistance = SceneConstants.MaximumViewDistance;
         private bool fog;
         public bool Fog
         {
             get => this.fog;
             set
             {
-                if (this.fog != value)
-                {
-                    this.fog = value;
-                    UpdateView();
-                }
+                this.fog = true;
+                this.fogCycle = value ? SwitchState.TurningOn : SwitchState.TurningOff;
+                this.fogTimer.Start();
+                UpdateFog();
+                UpdateView();
             }
         }
 
@@ -84,42 +89,14 @@ namespace SketcherControl
             get => this.nightMode;
             set
             {
-                if(this.nightMode != value)
+                if (this.nightMode != value)
                 {
                     this.nightMode = value;
-                    dayNightCycle = value ? DayNightCycle.DayToNight : DayNightCycle.NightToDay;
+                    nightModeCycle = value ? SwitchState.TurningOn : SwitchState.TurningOff;
                     this.dayNightTimer.Start();
                     UpdateBackground();
                     UpdateView();
                 }
-            }
-        }
-
-        private void UpdateBackground()
-        {
-            switch (dayNightCycle)
-            {
-                case DayNightCycle.NightToDay:
-                    if (backgroundColor.X == 0)
-                        backgroundColor = new Vector3(0.01f, 0.01f, 0.01f);
-                    if (backgroundColor.X >= 1)
-                    {
-                        dayNightCycle = DayNightCycle.Night;
-                        this.dayNightTimer.Stop();
-                    }
-                    backgroundColor *= 1.05f;
-                    break;
-                case DayNightCycle.DayToNight:
-                    backgroundColor /= 1.05f;
-                    if (backgroundColor.X < 0.01f)
-                    {
-                        backgroundColor = new Vector3(0, 0, 0);
-                        dayNightCycle = DayNightCycle.Day;
-                        this.dayNightTimer.Stop();
-                    }
-                    break;
-                default:
-                    break;
             }
         }
 
@@ -150,8 +127,18 @@ namespace SketcherControl
             this.dayNightTimer.Interval = 40;
             this.dayNightTimer.Tick += DayNightTimer_Tick;
 
+            this.fogTimer = new();
+            this.fogTimer.Interval = 40;
+            this.fogTimer.Tick += FogTimer_Tick;
+
             var camera = new BaseCamera();
             camera.Apply(this);
+        }
+
+        #region Event Handlers
+        private void FogTimer_Tick(object? sender, EventArgs e)
+        {
+            UpdateFog();
         }
 
         private void DayNightTimer_Tick(object? sender, EventArgs e)
@@ -159,7 +146,6 @@ namespace SketcherControl
             UpdateBackground();
         }
 
-        #region Event Handlers
         private void OnRenderFinished(DirectBitmap sceneRender)
         {
             this.sceneView.Dispose();
@@ -212,7 +198,8 @@ namespace SketcherControl
                 ShowLines = ShowLines,
                 Fill = Fill,
                 Fog = Fog,
-                Background = backgroundColor.ToColor()
+                Background = backgroundColor.ToColor(),
+                ViewDistance = this.viewDistance,
             };
 
             this.renderer.Render(Scene, renderParameters);
@@ -283,12 +270,68 @@ namespace SketcherControl
         }
         #endregion
 
-        private enum DayNightCycle
+        #region Scene manipulation 
+        private void UpdateFog()
         {
-            DayToNight,
-            NightToDay,
-            Day, 
-            Night
+            switch (fogCycle)
+            {
+                case SwitchState.TurningOn:
+                    if (this.viewDistance < SceneConstants.MinimumViewDistance)
+                    {
+                        fogCycle = SwitchState.Off;
+                        this.fogTimer.Stop();
+                    }
+                    this.viewDistance /= 1.02f;
+                    break;
+                case SwitchState.TurningOff:
+                    if (this.viewDistance > SceneConstants.MaximumViewDistance)
+                    {
+                        this.fog = false;
+                        fogCycle = SwitchState.On;
+                        this.fogTimer.Stop();
+                    }
+                    this.viewDistance *= 1.05f;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UpdateBackground()
+        {
+            switch (nightModeCycle)
+            {
+                case SwitchState.TurningOff:
+                    if (backgroundColor.X == 0)
+                        backgroundColor = new Vector3(0.01f, 0.01f, 0.01f);
+                    if (backgroundColor.X >= 1)
+                    {
+                        nightModeCycle = SwitchState.Off;
+                        this.dayNightTimer.Stop();
+                    }
+                    backgroundColor *= 1.05f;
+                    break;
+                case SwitchState.TurningOn:
+                    backgroundColor /= 1.05f;
+                    if (backgroundColor.X < 0.01f)
+                    {
+                        backgroundColor = new Vector3(0, 0, 0);
+                        nightModeCycle = SwitchState.On;
+                        this.dayNightTimer.Stop();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        #endregion
+
+        private enum SwitchState
+        {
+            On,
+            Off,
+            TurningOn,
+            TurningOff
         }
     }
 }

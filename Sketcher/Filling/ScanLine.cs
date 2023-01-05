@@ -59,12 +59,13 @@ namespace SketcherControl.Filling
         float fogDEnd = 10;
         float fogDStart = 0;
 
-        public PixelPainterWithFog(DirectBitmap bitmap, Shader colorPicker, Vector3 cameraVector, Vector4 backgroundColor)
+        public PixelPainterWithFog(DirectBitmap bitmap, Shader colorPicker, Vector3 cameraVector, Vector4 backgroundColor, float viewDistance)
         {
             this.bitmap = bitmap;
             this.colorPicker = colorPicker;
             this.cameraVector = cameraVector;
             this.backgroundColor = backgroundColor;
+            this.fogDEnd = viewDistance;
         }
 
         public void StartProcessing(Polygon polygon)

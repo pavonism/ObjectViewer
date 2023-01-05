@@ -12,4 +12,10 @@ namespace SketcherControl
 
         public static Color ThemeColor = Color.FromArgb(255, 0, 120, 215);
     }
+
+    public class SceneConstants
+    {
+        public const float MaximumViewDistance = 30;
+        public const float MinimumViewDistance = 7;
+    }
 }

@@ -85,7 +85,7 @@ namespace SketcherControl.SceneManipulation
             if(parameters.Fill)
             {
                 if (parameters.Fog)
-                    processor = new PixelPainterWithFog(bitmap, scene.Shader, parameters.CameraVector, parameters.Background.ToVector());
+                    processor = new PixelPainterWithFog(bitmap, scene.Shader, parameters.CameraVector, parameters.Background.ToVector(), parameters.ViewDistance);
                 else
                     processor = new PixelPainter(bitmap, scene.Shader);
             }
@@ -100,7 +100,7 @@ namespace SketcherControl.SceneManipulation
             if (processor != null)
             {
                 if (parameters.Fog)
-                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, parameters.Background.ToVector());
+                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, parameters.Background.ToVector(), parameters.ViewDistance);
                 else
                     processor = new PixelPainter(bitmap, shader);
             }
