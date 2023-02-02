@@ -10,11 +10,11 @@ namespace SketcherControl.Shapes
         private int objectIndx;
         private int RenderThreads = 20;
         private readonly List<Triangle> triangles = new();
-        public Vector3 Location { get; private set; }
+        public Vector3 Location;
 
         public Matrix4x4 Model { get; private set; }
-        public Matrix4x4 Rotation { get; protected set; } = Matrix4x4.Identity;
-        public Matrix4x4 Translation { get; protected set; } = Matrix4x4.Identity;
+        public Matrix4x4 Rotation { get; set; } = Matrix4x4.Identity;
+        public Matrix4x4 Translation { get; set; } = Matrix4x4.Identity;
         public Matrix4x4 Scale { get; protected set; } = Matrix4x4.Identity;
         public IEnumerable<Triangle> Triangles => this.triangles;
 
@@ -112,7 +112,7 @@ namespace SketcherControl.Shapes
             }
         }
 
-        private void UpdateModel()
+        public void UpdateModel()
         {
             Model = Rotation * Scale * Translation;
         }
@@ -124,9 +124,39 @@ namespace SketcherControl.Shapes
             UpdateModel();
         }
 
+        public void Move(float x, float y, float z)
+        {
+            this.Location.X += x;
+            this.Location.Y += y;
+            this.Location.Z += z;
+            this.Translation = Matrix4x4.CreateTranslation(Location);
+            UpdateModel();
+        }
+
         public void SetScale(float scale)
         {
             this.Scale = Matrix4x4.CreateScale(scale);
+            UpdateModel();
+        }
+
+        public void RotateX(float xRotation)
+        {
+            var rotation = Matrix4x4.CreateRotationX(xRotation);
+            this.Rotation *= rotation;
+            UpdateModel();
+        }
+
+        public void RotateY(float yRotation)
+        {
+            var rotation = Matrix4x4.CreateRotationY(yRotation);
+            this.Rotation *= rotation;
+            UpdateModel();
+        }
+
+        public void RotateZ(float zRotation)
+        {
+            var rotation = Matrix4x4.CreateRotationZ(zRotation);
+            this.Rotation *= rotation;
             UpdateModel();
         }
 

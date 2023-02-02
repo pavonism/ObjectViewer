@@ -39,9 +39,9 @@ namespace ObjectViewer.Scenes
 
             var sphere = loader.LoadObjectFromFile(Resources.SphereFile);
             var lightSource = new Reflector();
-            lightSource.SceneLocation = new Vector4(0, 0, 4, 0);
+            //lightSource.SceneLocation = new Vector4(0, 0, 4, 0);
             lightSource.ColorVector = new Vector4(1, 1, 1, 0);
-            lightSource.Target = new Vector4(0, 0, 0, 0);
+            //lightSource.Target = new Vector4(0, 0, 0, 0);
             sphere.Rotate(Matrix4x4.CreateRotationX((float)Math.PI));
             sphere.SetScale(0.1f);
             lightSource.Shape = sphere;
@@ -67,7 +67,8 @@ namespace ObjectViewer.Scenes
             }
 
             var animatedTorus = torusData;
-            animatedTorus.Animation = new SampleAnimation();
+            lightSource.SetParent(animatedTorus, new Vector3(0,0,0));
+            //animatedTorus.Animation = new SampleAnimation();
             scene.MovingObject = animatedTorus;
             scene.AddObject(animatedTorus);
             

@@ -250,23 +250,41 @@ namespace SketcherControl
 
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
         {
-            base.OnPreviewKeyDown(e);
+            if(e.Modifiers == Keys.Shift)
+                Scene.MovingObject.Move(0, 0, -0.05f);
 
             switch (e.KeyCode)
             {
                 case Keys.W:
-                    MoveCamera(0, 1);
+                    Scene.MovingObject.Move(0, 0.05f, 0);
                     break;
                 case Keys.S:
-                    MoveCamera(0, -1);
+                    Scene.MovingObject.Move(0, -0.05f, 0);
                     break;
                 case Keys.D:
-                    MoveCamera(-1, 0);
+                    Scene.MovingObject.Move(0.05f, 0,  0);
                     break;
                 case Keys.A:
-                    MoveCamera(1, 0);
+                    Scene.MovingObject.Move(-0.05f, 0, 0);
+                    break;
+                case Keys.Space:
+                    Scene.MovingObject.Move(0, 0, 0.05f);
+                    break;
+                case Keys.Up:
+                    Scene.MovingObject.RotateX((float)Math.PI / 20);
+                    break;
+                case Keys.Down:
+                    Scene.MovingObject.RotateX(-(float)Math.PI / 20);
+                    break;
+                case Keys.Left:
+                    Scene.MovingObject.RotateZ((float)Math.PI / 20);
+                    break;
+                case Keys.Right:
+                    Scene.MovingObject.RotateZ(-(float)Math.PI / 20);
                     break;
             }
+
+            base.OnPreviewKeyDown(e);
         }
         #endregion
 

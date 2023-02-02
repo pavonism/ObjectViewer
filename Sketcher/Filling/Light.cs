@@ -1,5 +1,7 @@
 ﻿using SketcherControl.Geometrics;
 using SketcherControl.Shapes;
+using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 
 namespace SketcherControl.Filling
@@ -9,7 +11,7 @@ namespace SketcherControl.Filling
         #region Fields and Events
         public event Action? LightSourceChanged;
 
-        private Object3? shape;
+        private Object3? shape; 
         public Object3? Shape
         {
             get => this.shape;
@@ -33,7 +35,7 @@ namespace SketcherControl.Filling
 
         #region Properties
         public float MinZ { get; set; } = 0;
-        public Vector4 SceneLocation
+        public virtual Vector4 SceneLocation
         {
             get => this.sceneLocation;
             set
@@ -87,6 +89,10 @@ namespace SketcherControl.Filling
         public virtual Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation)
         {
             return shaderColor;
+        }
+        public virtual void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor)
+        {
+            Shape?.Render(bitmap, cameraVector, showLines, pixelProcessor);
         }
     }
 }
