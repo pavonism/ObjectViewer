@@ -14,6 +14,7 @@ namespace SketcherControl.SceneManipulation
         public IEnumerable<Light> Lights => lightSources.ToList();
         public bool IsEmpty => !objects.Any();
         public Object3 MovingObject { get; set; }
+        public Reflector Reflector { get; set; }
 
         private Shader shader;
         public Shader Shader

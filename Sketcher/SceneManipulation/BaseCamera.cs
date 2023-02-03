@@ -74,12 +74,17 @@ namespace SketcherControl.SceneManipulation
         {
             this.view = Matrix4x4.CreateLookAt(cameraVector, this.movingObject.Translation.Translation, new Vector3(0, 0, 1));
         }
+
+        public override Vector3 GetLookVector()
+        {
+            return this.movingObject.Location;
+        }
     }
 
     public class FirstPersonCamera : FollowingCamera
     {
         protected Vector3 lookVector;
-        protected Vector3 cameraStartLook = new Vector3(0, 0, 3);
+        protected Vector3 cameraStartLook = new Vector3(0, 0, 1);
 
         public override void Apply(SceneViewer viewer)
         {
@@ -94,8 +99,8 @@ namespace SketcherControl.SceneManipulation
 
         public override void UpdateViewMatrix()
         {
-            this.cameraVector = this.movingObject.Translation.Translation;
-            lookVector = Vector3.Transform(cameraStartLook + this.cameraVector, this.movingObject.Rotation);
+            this.cameraVector = this.movingObject.Location;
+            lookVector = Vector3.Transform(cameraStartLook, this.movingObject.Rotation * this.movingObject.Translation);
             this.view = Matrix4x4.CreateLookAt(this.cameraVector, lookVector, new Vector3(0, 0, 1));
         }
     }

@@ -7,20 +7,21 @@ namespace ObjectViewer.Scenes
 {
     internal class SampleAnimation : IAnimation
     {
-        private float speed = 0.01f;
-        private float rotation = 0.03f;
+        private float speed = 0.02f;
         private float move;
+        public bool IsStopped { get; set; }
 
         public Matrix4x4 GetRotation()
         {
-            return Matrix4x4.CreateRotationY(rotation) * Matrix4x4.CreateRotationZ(rotation);
+            return Matrix4x4.Identity;
         }
 
         public Matrix4x4 GetTranslation()
         {
-            move += speed;
+            if(!IsStopped)
+                move += speed;
 
-            if (move >= 3 && speed > 0 || move <= -3 && speed < 0)
+            if (move >= 0.05 && speed > 0 || move <= -0.05 && speed < 0)
                 speed = -speed;
 
             return Matrix4x4.CreateTranslation(0, 0, speed);
@@ -41,7 +42,7 @@ namespace ObjectViewer.Scenes
             var lightSource = new Reflector();
             //lightSource.SceneLocation = new Vector4(0, 0, 4, 0);
             lightSource.ColorVector = new Vector4(1, 1, 1, 0);
-            //lightSource.Target = new Vector4(0, 0, 0, 0);
+            //lightSource.CurrentTarget = new Vector4(0, 0, 0, 0);
             sphere.Rotate(Matrix4x4.CreateRotationX((float)Math.PI));
             sphere.SetScale(0.1f);
             lightSource.Shape = sphere;
@@ -67,9 +68,11 @@ namespace ObjectViewer.Scenes
             }
 
             var animatedTorus = torusData;
-            lightSource.SetParent(animatedTorus, new Vector3(0,0,0));
-            //animatedTorus.Animation = new SampleAnimation();
+            animatedTorus.RotateX((float)Math.PI / 2);
+            lightSource.SetParent(animatedTorus, new Vector3(0,0,0), new Vector3(0, 0, 1));
+            animatedTorus.Animation = new SampleAnimation() { IsStopped = true };
             scene.MovingObject = animatedTorus;
+            scene.Reflector = lightSource;
             scene.AddObject(animatedTorus);
             
             return scene;

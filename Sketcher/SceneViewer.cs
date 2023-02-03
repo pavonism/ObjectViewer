@@ -282,6 +282,12 @@ namespace SketcherControl
                 case Keys.Right:
                     Scene.MovingObject.RotateZ(-(float)Math.PI / 20);
                     break;
+                case Keys.K:
+                    Scene.Reflector.TurnLeft();
+                    break;
+                case Keys.L:
+                    Scene.Reflector.TurnRight();
+                    break;
             }
 
             base.OnPreviewKeyDown(e);

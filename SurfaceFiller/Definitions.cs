@@ -74,6 +74,7 @@ namespace SurfaceFiller
         public const string SolidShader = "Bez cieniowania";
         public const string Day = "Dzień";
         public const string Night = "Noc";
+        public const string Vibrations = "Drgania";
     }
 
     public static class Glyphs

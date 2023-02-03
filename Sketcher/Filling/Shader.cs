@@ -55,10 +55,11 @@ namespace SketcherControl.Filling
                 Vector4 IL = light.ColorVector;
                 Vector4 IO = textureColor ?? target.Color.ToVector();
                 Vector4 L = Vector4.Normalize(light.SceneLocation - location);
-                Vector4 R = 2 * Vector4.Dot(normalVector, L) * normalVector - L;
 
                 var angleNL = Vector4.Dot(normalVector, L);
                 if (angleNL < 0) angleNL = 0;
+
+                Vector4 R = 2 * angleNL * normalVector - L;
 
                 var angleVR = Vector4.Dot(v, R);
                 if (angleVR < 0) angleVR = 0;

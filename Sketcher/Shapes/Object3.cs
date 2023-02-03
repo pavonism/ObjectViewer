@@ -5,6 +5,8 @@ using System.Numerics;
 
 namespace SketcherControl.Shapes
 {
+    public delegate void ObjectMovedHandler(Matrix4x4 newPosition, Matrix4x4 newRotation);
+
     public class Object3
     {
         private int objectIndx;
@@ -24,6 +26,8 @@ namespace SketcherControl.Shapes
 
         public IAnimation? Animation { get; set; }
         public Vector3 ObjectSize { get; private set; }
+
+        public event ObjectMovedHandler ObjectMoved;
 
         public Object3(List<Triangle> triangles, Vector3 objectSize, int objectIndx)
         {
@@ -99,7 +103,7 @@ namespace SketcherControl.Shapes
 
         public void Transform(int width, int height, Matrix4x4 view, Matrix4x4 position)
         {
-            if(Animation != null)
+            if(Animation != null && !Animation.IsStopped)
             {
                 this.Rotation *= Animation.GetRotation();
                 this.Translation *= Animation.GetTranslation();
@@ -122,6 +126,7 @@ namespace SketcherControl.Shapes
             this.Location = new Vector3(x, y, z);
             this.Translation = Matrix4x4.CreateTranslation(Location);
             UpdateModel();
+            ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         public void Move(float x, float y, float z)
@@ -131,6 +136,7 @@ namespace SketcherControl.Shapes
             this.Location.Z += z;
             this.Translation = Matrix4x4.CreateTranslation(Location);
             UpdateModel();
+            ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         public void SetScale(float scale)
@@ -144,6 +150,7 @@ namespace SketcherControl.Shapes
             var rotation = Matrix4x4.CreateRotationX(xRotation);
             this.Rotation *= rotation;
             UpdateModel();
+            ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         public void RotateY(float yRotation)
@@ -151,6 +158,7 @@ namespace SketcherControl.Shapes
             var rotation = Matrix4x4.CreateRotationY(yRotation);
             this.Rotation *= rotation;
             UpdateModel();
+            ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         public void RotateZ(float zRotation)
@@ -158,12 +166,14 @@ namespace SketcherControl.Shapes
             var rotation = Matrix4x4.CreateRotationZ(zRotation);
             this.Rotation *= rotation;
             UpdateModel();
+            ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         public void Rotate(Matrix4x4 rotation)
         {
             this.Rotation *= rotation;
             UpdateModel();
+            ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         internal void UpdateBarycentricCache()

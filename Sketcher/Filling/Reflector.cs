@@ -5,42 +5,37 @@ namespace SketcherControl.Filling
 {
     public class Reflector : Light
     {
-        private Vector4 target;
+        private Vector3 target;
         private Vector3 offset;
         private Object3? parent;
+        private float targetRotation;
+        private Matrix4x4 currentTargetRotation;
 
-        public override Vector4 SceneLocation
-        {
-            get
-            {
-                return this.parent != null ? new Vector4(this.parent.Location + this.offset, 0) : base.SceneLocation;
-            }
-            set
-            {
-            }
-        }
+        public override Vector4 SceneLocation { get; set; }
+        public Vector4 CurrentTarget { get; set; }
 
-        public Vector4 Target
-        {
-            get => this.parent != null ? Vector4.Transform(new Vector3(0,0,1), this.parent.Rotation) : this.target;
-            set
-            {
-                this.target = Vector4.Normalize(value - SceneLocation);
-            }
-        }
 
         public override Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation)
         {
             var lightLine = Vector4.Normalize(pointLocation - SceneLocation);
-            var cos = Vector4.Dot(Target, lightLine);
+            var cos = Vector4.Dot(CurrentTarget, lightLine);
 
             return cos * shaderColor;
         }
 
-        public void SetParent(Object3 parent, Vector3 offset)
+        public void SetParent(Object3 parent, Vector3 offset, Vector3 target)
         {
             this.parent = parent;
             this.offset = offset;
+            this.target = target;
+            UpdateTarget(true);
+            this.parent.ObjectMoved += Parent_ObjectMoved;
+        }
+
+        private void Parent_ObjectMoved(Matrix4x4 newPosition, Matrix4x4 newRotation)
+        {
+            UpdateTarget();
+            SceneLocation = new Vector4(newPosition.Translation + offset, 0);
         }
 
         public override void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor)
@@ -52,6 +47,33 @@ namespace SketcherControl.Filling
                 Shape.UpdateModel();
             }
             base.RenderShape(bitmap, cameraVector, showLines, pixelProcessor);
+        }
+
+        public void TurnRight()
+        {
+            targetRotation += (float)Math.PI / 100000;
+            UpdateTarget(true);
+        }
+
+        public void TurnLeft()
+        {
+            targetRotation -= (float)Math.PI / 100000;
+            UpdateTarget(true);
+        }
+
+        private void UpdateTarget(bool recalculateMatrix = false)
+        {
+            if (recalculateMatrix)
+            {
+                this.currentTargetRotation = Matrix4x4.CreateRotationX(this.targetRotation);
+            }
+
+            CurrentTarget = Vector4.Transform(this.target, this.currentTargetRotation);
+
+            if (this.parent != null)
+            {
+                CurrentTarget = Vector4.Transform(CurrentTarget, parent.Rotation * parent.Translation);
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace SurfaceFiller
         private SceneViewer sceneViewer;
         private Scene scene;
 
-        private CameraSample[] cameras =
+        private readonly CameraSample[] cameras =
         {
             new CameraSample(Labels.StaticCamera, new BaseCamera()),
             new CameraSample(Labels.FollowingCamera, new FollowingCamera()),
@@ -25,7 +25,7 @@ namespace SurfaceFiller
             new CameraSample(Labels.FreeCamera, new FreeCamera()),
         };
 
-        private ShaderSample[] shaders =
+        private readonly ShaderSample[] shaders =
         {
             new ShaderSample(Labels.PhongShader, new PhongShader()),
             new ShaderSample(Labels.GouraudShader, new GouraudShader()),
@@ -69,6 +69,8 @@ namespace SurfaceFiller
             this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, false);
             this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, true);
             this.toolbar.AddOption(FogHandler, Labels.Fog);
+            this.toolbar.AddOption(VibrationsHandler, Labels.Vibrations);
+            this.toolbar.AddSpacing();
             this.toolbar.StartSection();
             this.toolbar.AddRadioOption(DayRadioHandler, Labels.Day, null, true);
             this.toolbar.AddRadioOption(NightRadioHandler, Labels.Night);
@@ -175,6 +177,12 @@ namespace SurfaceFiller
                 Y = this.sceneViewer.CameraVector.Y,
                 Z = this.sceneViewer.CameraVector.Z,
             };
+        }
+
+        private void VibrationsHandler(bool newValue)
+        {
+            if(this.scene.MovingObject?.Animation != null)
+                this.scene.MovingObject.Animation.IsStopped = !newValue;
         }
 
         private void FovSliderHandler(float obj)
