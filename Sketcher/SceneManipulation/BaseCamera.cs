@@ -90,6 +90,12 @@ namespace SketcherControl.SceneManipulation
         {
             base.Apply(viewer);
             this.fov = (float)Math.PI * 2 / 3;
+            this.movingObject.ObjectMoved += MovingObject_ObjectMoved;
+        }
+
+        private void MovingObject_ObjectMoved(Matrix4x4 newPosition, Matrix4x4 newRotation)
+        {
+            UpdateViewMatrix();
         }
 
         public override Vector3 GetLookVector()

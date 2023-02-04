@@ -86,7 +86,7 @@ namespace SketcherControl.Filling
         }
         #endregion
 
-        public virtual Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation)
+        public virtual Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation, Vector4 normalVector)
         {
             return shaderColor;
         }

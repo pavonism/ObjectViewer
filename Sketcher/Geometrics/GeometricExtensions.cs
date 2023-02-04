@@ -37,11 +37,11 @@ namespace SketcherControl.Geometrics
 
         public static Vector4 Cut(this ref Vector4 vector)
         {
-            if (vector.X < 0) vector.X = 0;
+            if (vector.X < 0 || float.IsNaN(vector.X)) vector.X = 0;
             if (vector.X > 1) vector.X = 1;
-            if (vector.Y < 0) vector.Y = 0;
+            if (vector.Y < 0 || float.IsNaN(vector.Y)) vector.Y = 0;
             if (vector.Y > 1) vector.Y = 1;
-            if (vector.Z < 0) vector.Z = 0;
+            if (vector.Z < 0 || float.IsNaN(vector.Z)) vector.Z = 0;
             if (vector.Z > 1) vector.Z = 1;
 
             vector.W = 0;

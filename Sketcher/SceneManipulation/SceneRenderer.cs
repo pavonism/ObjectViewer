@@ -1,6 +1,7 @@
 ﻿using SketcherControl.Filling;
 using SketcherControl.Geometrics;
 using SketcherControl.Shapes;
+using System.Numerics;
 
 namespace SketcherControl.SceneManipulation
 {
@@ -80,18 +81,19 @@ namespace SketcherControl.SceneManipulation
         {
             IPixelProcessor? processor = null;
             Shader shader = scene.Shader;
+            shader.Observer = new Vector4(parameters.CameraVector, 0);
 
             if(parameters.Fill)
             {
                 if (parameters.Fog)
-                    processor = new PixelPainterWithFog(bitmap, scene.Shader, parameters.CameraVector, parameters.Background.ToVector(), parameters.ViewDistance);
+                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, parameters.Background.ToVector(), parameters.ViewDistance);
                 else
-                    processor = new PixelPainter(bitmap, scene.Shader);
+                    processor = new PixelPainter(bitmap, shader);
             }
 
             foreach (var obj in scene.Objects)
             {
-                scene.Shader?.Initialize(obj, scene.Lights);
+                shader?.Initialize(obj, scene.Lights);
                 obj.Render(bitmap, parameters.CameraVector, parameters.ShowLines, processor);
             }
 

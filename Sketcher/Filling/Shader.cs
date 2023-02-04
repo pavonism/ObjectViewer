@@ -8,7 +8,7 @@ namespace SketcherControl.Filling
     {
         #region Fields and Events
         public event Action? ParametersChanged;
-        private Vector4 v = new(0, 0, 1, 0);
+        public Vector4 Observer { get; set; } = new(0, 0, 1, 0);
 
         private List<Light> lights = new();
         public ShaderParameters Parameters { get; set; } = new();
@@ -60,11 +60,12 @@ namespace SketcherControl.Filling
                 if (angleNL < 0) angleNL = 0;
 
                 Vector4 R = 2 * angleNL * normalVector - L;
+                Vector4 observer = Vector4.Normalize(Observer - location);
 
-                var angleVR = Vector4.Dot(v, R);
+                var angleVR = Vector4.Dot(observer, R);
                 if (angleVR < 0) angleVR = 0;
                 var lightresult = (Parameters.KD * IL * IO * angleNL) + (Parameters.KS * IL * IO * (float)Math.Pow(angleVR, Parameters.M));
-                result += light.AdjustColorFromShader(lightresult, location);
+                result += light.AdjustColorFromShader(lightresult, location, normalVector);
             }
 
             return result.Cut();

@@ -16,6 +16,7 @@ namespace SketcherControl.Shapes
 
         public Matrix4x4 Model { get; private set; }
         public Matrix4x4 Rotation { get; set; } = Matrix4x4.Identity;
+        private Vector3 angles;
         public Matrix4x4 Translation { get; set; } = Matrix4x4.Identity;
         public Matrix4x4 Scale { get; protected set; } = Matrix4x4.Identity;
         public IEnumerable<Triangle> Triangles => this.triangles;
@@ -147,26 +148,34 @@ namespace SketcherControl.Shapes
 
         public void RotateX(float xRotation)
         {
-            var rotation = Matrix4x4.CreateRotationX(xRotation);
-            this.Rotation *= rotation;
+            angles.X += xRotation;
+            angles.X %= 2 * (float)Math.PI;
+            UpdateRotationMatrix();
             UpdateModel();
             ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         public void RotateY(float yRotation)
         {
-            var rotation = Matrix4x4.CreateRotationY(yRotation);
-            this.Rotation *= rotation;
+            angles.Y += yRotation;
+            angles.Y %= 2 * (float)Math.PI;
+            UpdateRotationMatrix();
             UpdateModel();
             ObjectMoved?.Invoke(Translation, Rotation);
         }
 
         public void RotateZ(float zRotation)
         {
-            var rotation = Matrix4x4.CreateRotationZ(zRotation);
-            this.Rotation *= rotation;
+            angles.Z += zRotation;
+            angles.Z %= 2 * (float)Math.PI;
+            UpdateRotationMatrix();
             UpdateModel();
             ObjectMoved?.Invoke(Translation, Rotation);
+        }
+
+        public void UpdateRotationMatrix()
+        {
+            Rotation = Matrix4x4.CreateRotationX(angles.X) * Matrix4x4.CreateRotationY(angles.Y) * Matrix4x4.CreateRotationZ(angles.Z);
         }
 
         public void Rotate(Matrix4x4 rotation)

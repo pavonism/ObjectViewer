@@ -15,7 +15,7 @@ namespace SketcherControl.Filling
         public Vector4 CurrentTarget { get; set; }
 
 
-        public override Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation)
+        public override Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation, Vector4 normalVector)
         {
             var lightLine = Vector4.Normalize(pointLocation - SceneLocation);
             var cos = Vector4.Dot(CurrentTarget, lightLine);
@@ -35,7 +35,7 @@ namespace SketcherControl.Filling
         private void Parent_ObjectMoved(Matrix4x4 newPosition, Matrix4x4 newRotation)
         {
             UpdateTarget();
-            SceneLocation = new Vector4(newPosition.Translation + offset, 0);
+            SceneLocation = new Vector4(newPosition.Translation + Vector3.Transform(offset, newRotation), 0);
         }
 
         public override void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor)
@@ -51,13 +51,13 @@ namespace SketcherControl.Filling
 
         public void TurnRight()
         {
-            targetRotation += (float)Math.PI / 100000;
+            targetRotation += (float)Math.PI / 50;
             UpdateTarget(true);
         }
 
         public void TurnLeft()
         {
-            targetRotation -= (float)Math.PI / 100000;
+            targetRotation -= (float)Math.PI / 50;
             UpdateTarget(true);
         }
 
@@ -68,12 +68,16 @@ namespace SketcherControl.Filling
                 this.currentTargetRotation = Matrix4x4.CreateRotationX(this.targetRotation);
             }
 
-            CurrentTarget = Vector4.Transform(this.target, this.currentTargetRotation);
+            var currentTarget = Vector4.Transform(this.target, this.currentTargetRotation);
 
             if (this.parent != null)
             {
-                CurrentTarget = Vector4.Transform(CurrentTarget, parent.Rotation * parent.Translation);
+                currentTarget = Vector4.Transform(currentTarget, parent.Rotation * parent.Translation);
             }
+
+            currentTarget /= currentTarget.W;
+            currentTarget.W = 0;
+            CurrentTarget = Vector4.Normalize(currentTarget - SceneLocation);
         }
     }
 }

@@ -58,6 +58,7 @@ namespace SurfaceFiller
         {
             var builder = new SampleSceneBuilder();
             this.scene = builder.Build();
+            this.scene.Shader = shaders.First().Shader;
             this.sceneViewer = new(this.scene);
         }
 
