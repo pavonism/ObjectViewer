@@ -21,7 +21,17 @@ namespace SketcherControl.Shapes
         public Matrix4x4 Scale { get; protected set; } = Matrix4x4.Identity;
         public IEnumerable<Triangle> Triangles => this.triangles;
 
-        public Color Color { get; set; }
+        private Color color;
+        public Color Color
+        {
+            get { return this.color; }
+            set
+            {
+                this.color = value;
+                VectorColor = value.ToVector();
+            }
+        }
+        public Vector4 VectorColor { get; private set; }
         public virtual DirectBitmap? Texture { get; set; }
         public virtual DirectBitmap? NormalMap { get; set; }
 
