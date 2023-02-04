@@ -1,6 +1,4 @@
 ﻿
-using System.CodeDom;
-
 namespace SurfaceFiller
 {
     public static class Defaults

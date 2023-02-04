@@ -86,10 +86,16 @@ namespace SketcherControl.Filling
         }
         #endregion
 
-        public virtual Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation, Vector4 normalVector)
+        public virtual Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation, Vector4 normalVector, float night)
         {
-            return shaderColor;
+            return shaderColor * (1 - night);
         }
+
+        public virtual bool IsVisible(float night)
+        {
+            return night < 1f;
+        }
+
         public virtual void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor)
         {
             Shape?.Render(bitmap, cameraVector, showLines, pixelProcessor);

@@ -30,9 +30,10 @@ namespace SketcherControl.SceneManipulation
         {
             return Task.Run(() =>
             {
-                var directBitmap = PrepareBitmap(parameters.ViewWidth, parameters.ViewHeight, parameters.Background);
+                var backgroundColor = (Color.White.ToVector() * (1 - parameters.Night));
+                var directBitmap = PrepareBitmap(parameters.ViewWidth, parameters.ViewHeight, backgroundColor);
                 PrepareScene(scene, parameters);
-                PaintScene(directBitmap, scene, parameters);
+                PaintScene(directBitmap, scene, parameters, backgroundColor);
                 return directBitmap;
             });
         }
@@ -65,28 +66,29 @@ namespace SketcherControl.SceneManipulation
             });
         }
 
-        private DirectBitmap PrepareBitmap(int width, int height, Color backgroundColor)
+        private DirectBitmap PrepareBitmap(int width, int height, Vector4 backgroundColor)
         {
             var bitmap = new DirectBitmap(width, height);
 
             using(var g = Graphics.FromImage(bitmap.Bitmap))
             {
-                g.Clear(backgroundColor);
+                g.Clear(backgroundColor.ToColor());
             }
 
             return bitmap;
         }
 
-        public void PaintScene(DirectBitmap bitmap, Scene scene, SceneRenderParameters parameters)
+        public void PaintScene(DirectBitmap bitmap, Scene scene, SceneRenderParameters parameters, Vector4 backgroundColor)
         {
             IPixelProcessor? processor = null;
             Shader shader = scene.Shader;
+            shader.Night = parameters.Night;
             shader.Observer = new Vector4(parameters.CameraVector, 0);
 
             if(parameters.Fill)
             {
                 if (parameters.Fog)
-                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, parameters.Background.ToVector(), parameters.ViewDistance, parameters.FogIntensity);
+                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, backgroundColor, parameters.ViewDistance, parameters.FogIntensity);
                 else
                     processor = new PixelPainter(bitmap, shader);
             }
@@ -101,7 +103,7 @@ namespace SketcherControl.SceneManipulation
             if (processor != null)
             {
                 if (parameters.Fog)
-                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, parameters.Background.ToVector(), parameters.ViewDistance, parameters.FogIntensity);
+                    processor = new PixelPainterWithFog(bitmap, shader, parameters.CameraVector, backgroundColor, parameters.ViewDistance, parameters.FogIntensity);
                 else
                     processor = new PixelPainter(bitmap, shader);
             }

@@ -13,6 +13,7 @@ namespace SketcherControl.Filling
         private List<Light> lights = new();
         public ShaderParameters Parameters { get; set; } = new();
         protected Object3 target;
+        public float Night { get; set; }
         #endregion
 
         #region Initialization
@@ -50,7 +51,7 @@ namespace SketcherControl.Filling
         {
             Vector4 result = new();
 
-            foreach (var light in lights)
+            foreach (var light in lights.Where((light) => light.IsVisible(Night)))
             {
                 Vector4 IL = light.ColorVector;
                 Vector4 IO = textureColor ?? target.Color.ToVector();
@@ -65,7 +66,7 @@ namespace SketcherControl.Filling
                 var angleVR = Vector4.Dot(observer, R);
                 if (angleVR < 0) angleVR = 0;
                 var lightresult = (Parameters.KD * IL * IO * angleNL) + (Parameters.KS * IL * IO * (float)Math.Pow(angleVR, Parameters.M));
-                result += light.AdjustColorFromShader(lightresult, location, normalVector);
+                result += light.AdjustColorFromShader(lightresult, location, normalVector, Night) + 0.1f * target.Color.ToVector();
             }
 
             return result.Cut();

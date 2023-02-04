@@ -1,6 +1,21 @@
 ﻿
 namespace SurfaceFiller.Components
 {
+    public class RatioSlider : FractSlider
+    {
+        public RatioSlider(string firstValue, string secondValue)
+        {
+            LabelText = firstValue;
+            this.label.TextAlign = ContentAlignment.MiddleRight;
+            this.valueLabel.TextAlign = ContentAlignment.MiddleLeft;
+            this.valueLabel.Text = secondValue;
+        }
+
+        protected override void UpdateLabelText()
+        {
+        }
+    }
+
     public class FractSlider : Slider<float>
     {
         public FractSlider() : base()

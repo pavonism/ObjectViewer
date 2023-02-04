@@ -17,8 +17,8 @@ namespace SketcherControl.SceneManipulation
         public Vector3 CameraVector { get; set; }
         public bool ShowLines { get; set; }
         public bool Fill { get; set; }
+        public float Night { get; set; }
         public bool Fog { get; set; }
-        public Color Background { get; set; }
         public float ViewDistance { get; set; }
         public float FogIntensity { get; set; }
     }

@@ -79,11 +79,7 @@ namespace SurfaceFiller
             this.toolbar.EndSection();
             this.toolbar.AddDivider();
             this.toolbar.AddSpacing();
-            this.toolbar.StartSection();
-            this.toolbar.AddRadioOption(DayRadioHandler, Labels.Day, null, true);
-            this.toolbar.AddRadioOption(NightRadioHandler, Labels.Night);
-            this.toolbar.EndSection();
-            this.toolbar.AddSpacing();
+            this.toolbar.AddRationSlider(DayNightSliderHandler, Labels.Day, Labels.Night, 0f);
             this.toolbar.AddDivider();
             this.toolbar.AddLabel(Labels.Shaders);
             this.toolbar.AddComboPicker(ShaderChangedHandler, this.shaders, this.shaders.First());
@@ -110,16 +106,6 @@ namespace SurfaceFiller
             this.fogSection.Visible = false;
         }
 
-        private void FogIntensityHandler(float value)
-        {
-            this.sceneViewer.FogIntensity = value;
-        }
-
-        private void FogDistanceHandler(float value)
-        {
-            this.sceneViewer.FogDistance = SceneConstants.MinimumViewDistance + value * (SceneConstants.MaximumViewDistance - SceneConstants.MinimumViewDistance);
-        }
-
         private void InitializeForm()
         {
             this.Text = Resources.ProgramTitle;
@@ -140,16 +126,23 @@ namespace SurfaceFiller
         #endregion
 
         #region Handlers 
-        private void NightRadioHandler(object? sender, EventArgs e)
+        private void DayNightSliderHandler(float value)
         {
-            this.sceneViewer.NightMode = true;
+            if (value > 0)
+                this.sceneViewer.Night = 1 / (float)Math.Pow(1.02, (1 - value) * 100);
+            else
+                this.sceneViewer.Night = 0;
         }
 
-        private void DayRadioHandler(object? sender, EventArgs e)
+        private void FogIntensityHandler(float value)
         {
-            this.sceneViewer.NightMode = false;
+            this.sceneViewer.FogIntensity = value;
         }
 
+        private void FogDistanceHandler(float value)
+        {
+            this.sceneViewer.FogDistance = SceneConstants.MinimumViewDistance + value * (SceneConstants.MaximumViewDistance - SceneConstants.MinimumViewDistance);
+        }
         private void FogHandler(bool value)
         {
             this.sceneViewer.Fog = value;

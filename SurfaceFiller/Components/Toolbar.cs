@@ -105,6 +105,19 @@ namespace SurfaceFiller.Components
             slider.Value = defaultValue;
         }
 
+        public void AddRationSlider(Action<float> handler, string labelText1, string labelText2, float defaultValue = 0)
+        {
+            var slider = new RatioSlider(labelText1, labelText2)
+            {
+                Dock = DockStyle.Top,
+                Width = this.Width,
+            };
+
+            AddControl(slider);
+            slider.ValueChanged += handler;
+            slider.Value = defaultValue;
+        }
+
         public void AddPlayPouse(Action<bool> handler, bool defaultState, string? hint = null)
         {
             var button = new PlayPouseButton();

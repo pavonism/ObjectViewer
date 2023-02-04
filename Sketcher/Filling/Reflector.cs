@@ -14,11 +14,16 @@ namespace SketcherControl.Filling
         public override Vector4 SceneLocation { get; set; }
         public Vector4 CurrentTarget { get; set; }
 
+        public override bool IsVisible(float night)
+        {
+            return true;
+        }
 
-        public override Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation, Vector4 normalVector)
+        public override Vector4 AdjustColorFromShader(Vector4 shaderColor, Vector4 pointLocation, Vector4 normalVector, float night)
         {
             var lightLine = Vector4.Normalize(pointLocation - SceneLocation);
             var cos = Vector4.Dot(CurrentTarget, lightLine);
+
 
             return cos * shaderColor;
         }

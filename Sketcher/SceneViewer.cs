@@ -11,10 +11,6 @@ namespace SketcherControl
         private SceneRenderer renderer;
         private Timer renderTimer;
         private Timer fpsTimer;
-        private Timer dayNightTimer;
-
-        private Vector3 backgroundColor = new Vector3(1, 1, 1);
-        private SwitchState nightModeCycle;
 
         public Scene Scene { get; private set; }
         public Matrix4x4 View { get; set; }
@@ -69,22 +65,7 @@ namespace SketcherControl
             }
         }
 
-        private bool nightMode;
-        public bool NightMode
-        {
-            get => this.nightMode;
-            set
-            {
-                if (this.nightMode != value)
-                {
-                    this.nightMode = value;
-                    nightModeCycle = value ? SwitchState.TurningOn : SwitchState.TurningOff;
-                    this.dayNightTimer.Start();
-                    UpdateBackground();
-                    UpdateView();
-                }
-            }
-        }
+        public float Night { get; set; }
 
         public bool Fill { get; set; } = false;
         public bool ShowLines { get; set; } = false;
@@ -109,20 +90,11 @@ namespace SketcherControl
             this.fpsTimer.Tick += FpsTimer_Tick;
             this.fpsTimer.Start();
 
-            this.dayNightTimer = new();
-            this.dayNightTimer.Interval = 40;
-            this.dayNightTimer.Tick += DayNightTimer_Tick;
-
             var camera = new BaseCamera();
             camera.Apply(this);
         }
 
         #region Event Handlers
-        private void DayNightTimer_Tick(object? sender, EventArgs e)
-        {
-            UpdateBackground();
-        }
-
         private void OnRenderFinished(DirectBitmap sceneRender)
         {
             this.sceneView.Dispose();
@@ -174,7 +146,7 @@ namespace SketcherControl
                 CameraVector = Camera.GetCameraVector(),
                 ShowLines = ShowLines,
                 Fill = Fill,
-                Background = backgroundColor.ToColor(),
+                Night = Night,
                 Fog = Fog,
                 ViewDistance = FogDistance,
                 FogIntensity  = FogIntensity,
@@ -271,43 +243,5 @@ namespace SketcherControl
             base.OnPreviewKeyDown(e);
         }
         #endregion
-
-        #region Scene manipulation 
-        private void UpdateBackground()
-        {
-            switch (nightModeCycle)
-            {
-                case SwitchState.TurningOff:
-                    if (backgroundColor.X == 0)
-                        backgroundColor = new Vector3(0.01f, 0.01f, 0.01f);
-                    if (backgroundColor.X >= 1)
-                    {
-                        nightModeCycle = SwitchState.Off;
-                        this.dayNightTimer.Stop();
-                    }
-                    backgroundColor *= 1.05f;
-                    break;
-                case SwitchState.TurningOn:
-                    backgroundColor /= 1.05f;
-                    if (backgroundColor.X < 0.01f)
-                    {
-                        backgroundColor = new Vector3(0, 0, 0);
-                        nightModeCycle = SwitchState.On;
-                        this.dayNightTimer.Stop();
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        #endregion
-
-        private enum SwitchState
-        {
-            On,
-            Off,
-            TurningOn,
-            TurningOff
-        }
     }
 }
