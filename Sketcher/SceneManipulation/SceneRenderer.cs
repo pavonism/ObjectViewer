@@ -113,7 +113,7 @@ namespace SketcherControl.SceneManipulation
                 if(light.Shape != null)
                 {
                     shader.Initialize(light.Shape, Enumerable.Empty<Light>());
-                    light.RenderShape(bitmap, parameters.CameraVector, parameters.ShowLines, processor);
+                    light.RenderShape(bitmap, parameters.CameraVector, parameters.ShowLines, processor, parameters.Night);
                 }
             }
         }

@@ -29,6 +29,11 @@ namespace SketcherControl.Geometrics
             return normalMapVector;
         }
 
+        public static Color Multiply(this Color color, float number)
+        {
+            return (number * color.ToVector()).ToColor();
+        }
+
         public static Color ToColor(this Vector4 vector)
         {
             vector.Cut();

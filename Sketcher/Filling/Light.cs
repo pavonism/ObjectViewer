@@ -96,9 +96,13 @@ namespace SketcherControl.Filling
             return night < 1f;
         }
 
-        public virtual void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor)
+        public virtual void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor, float night)
         {
-            Shape?.Render(bitmap, cameraVector, showLines, pixelProcessor);
+            if(Shape != null)
+            {
+                Shape.Color = this.color.Multiply(1 - night);
+                Shape.Render(bitmap, cameraVector, showLines, pixelProcessor);
+            }
         }
     }
 }

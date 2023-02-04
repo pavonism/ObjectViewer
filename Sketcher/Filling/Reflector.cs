@@ -43,15 +43,15 @@ namespace SketcherControl.Filling
             SceneLocation = new Vector4(newPosition.Translation + Vector3.Transform(offset, newRotation), 0);
         }
 
-        public override void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor)
+        public override void RenderShape(DirectBitmap bitmap, Vector3 cameraVector, bool showLines, IPixelProcessor? pixelProcessor, float night)
         {
             if (this.parent != null && Shape != null)
             {
                 this.Shape.Translation = this.parent.Translation;
                 this.Shape.Rotation = this.parent.Rotation;
                 Shape.UpdateModel();
+                Shape.Render(bitmap, cameraVector, showLines, pixelProcessor);
             }
-            base.RenderShape(bitmap, cameraVector, showLines, pixelProcessor);
         }
 
         public void TurnRight()

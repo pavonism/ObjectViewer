@@ -39,22 +39,20 @@ namespace ObjectViewer.Scenes
             ObjectLoader loader = new();
 
             var sphere = loader.LoadObjectFromFile(Resources.SphereFile);
-            var lightSource = new Reflector();
-            //lightSource.SceneLocation = new Vector4(0, 0, 4, 0);
-            lightSource.ColorVector = new Vector4(1, 1, 1, 0);
-            //lightSource.CurrentTarget = new Vector4(0, 0, 0, 0);
+            var reflector = new Reflector();
+            reflector.ColorVector = new Vector4(1, 1, 1, 0);
             sphere.Rotate(Matrix4x4.CreateRotationX((float)Math.PI));
             sphere.SetScale(0.1f);
-            lightSource.Shape = sphere;
-            scene.AddLightSource(lightSource);
+            reflector.Shape = sphere;
+            scene.AddLightSource(reflector);
 
-            //lightSource = new Light();
-            //lightSource.SceneLocation = new Vector4(-3, 2, 1, 0);
-            //lightSource.Color = Color.Red;
-            //sphere.Rotate(Matrix4x4.CreateRotationX((float)Math.PI));
-            //lightSource.Shape = loader.MakeCopy(sphere);
-            //lightSource.Shape.SetScale(0.1f);
-            //scene.AddLightSource(lightSource);
+            var lightSource = new Light();
+            lightSource.SceneLocation = new Vector4(-3, 2, 3, 0);
+            lightSource.Color = Color.Red;
+            sphere.Rotate(Matrix4x4.CreateRotationX((float)Math.PI));
+            lightSource.Shape = loader.MakeCopy(sphere);
+            lightSource.Shape.SetScale(0.1f);
+            scene.AddLightSource(lightSource);
 
             var torusData = loader.LoadObjectFromFile(Resources.TorusFile);
 
@@ -69,10 +67,10 @@ namespace ObjectViewer.Scenes
 
             var animatedTorus = torusData;
             animatedTorus.RotateX((float)Math.PI / 2);
-            lightSource.SetParent(animatedTorus, new Vector3(0,0,0), new Vector3(0, 0, 1));
+            reflector.SetParent(animatedTorus, new Vector3(0,0,0), new Vector3(0, 0, 1));
             animatedTorus.Animation = new SampleAnimation() { IsStopped = true };
             scene.MovingObject = animatedTorus;
-            scene.Reflector = lightSource;
+            scene.Reflector = reflector;
             scene.AddObject(animatedTorus);
             
             return scene;
