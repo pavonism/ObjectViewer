@@ -12,12 +12,9 @@ namespace SketcherControl
         private Timer renderTimer;
         private Timer fpsTimer;
         private Timer dayNightTimer;
-        private Timer fogTimer;
-
 
         private Vector3 backgroundColor = new Vector3(1, 1, 1);
         private SwitchState nightModeCycle;
-        private SwitchState fogCycle;
 
         public Scene Scene { get; private set; }
         public Matrix4x4 View { get; set; }
@@ -40,20 +37,9 @@ namespace SketcherControl
         private int frames;
         private int fps;
 
-        private float viewDistance = SceneConstants.MaximumViewDistance;
-        private bool fog;
-        public bool Fog
-        {
-            get => this.fog;
-            set
-            {
-                this.fog = true;
-                this.fogCycle = value ? SwitchState.TurningOn : SwitchState.TurningOff;
-                this.fogTimer.Start();
-                UpdateFog();
-                UpdateView();
-            }
-        }
+        public float FogDistance { get; set; } = SceneConstants.MaximumViewDistance;
+        public float FogIntensity { get; set; }
+        public bool Fog { get; set; }
 
         private float fov = (float)Math.PI / 6;
         public float FOV
@@ -127,20 +113,11 @@ namespace SketcherControl
             this.dayNightTimer.Interval = 40;
             this.dayNightTimer.Tick += DayNightTimer_Tick;
 
-            this.fogTimer = new();
-            this.fogTimer.Interval = 40;
-            this.fogTimer.Tick += FogTimer_Tick;
-
             var camera = new BaseCamera();
             camera.Apply(this);
         }
 
         #region Event Handlers
-        private void FogTimer_Tick(object? sender, EventArgs e)
-        {
-            UpdateFog();
-        }
-
         private void DayNightTimer_Tick(object? sender, EventArgs e)
         {
             UpdateBackground();
@@ -197,9 +174,10 @@ namespace SketcherControl
                 CameraVector = Camera.GetCameraVector(),
                 ShowLines = ShowLines,
                 Fill = Fill,
-                Fog = Fog,
                 Background = backgroundColor.ToColor(),
-                ViewDistance = this.viewDistance,
+                Fog = Fog,
+                ViewDistance = FogDistance,
+                FogIntensity  = FogIntensity,
             };
 
             this.renderer.Render(Scene, renderParameters);
@@ -295,32 +273,6 @@ namespace SketcherControl
         #endregion
 
         #region Scene manipulation 
-        private void UpdateFog()
-        {
-            switch (fogCycle)
-            {
-                case SwitchState.TurningOn:
-                    if (this.viewDistance < SceneConstants.MinimumViewDistance)
-                    {
-                        fogCycle = SwitchState.Off;
-                        this.fogTimer.Stop();
-                    }
-                    this.viewDistance /= 1.02f;
-                    break;
-                case SwitchState.TurningOff:
-                    if (this.viewDistance > SceneConstants.MaximumViewDistance)
-                    {
-                        this.fog = false;
-                        fogCycle = SwitchState.On;
-                        this.fogTimer.Stop();
-                    }
-                    this.viewDistance *= 1.05f;
-                    break;
-                default:
-                    break;
-            }
-        }
-
         private void UpdateBackground()
         {
             switch (nightModeCycle)

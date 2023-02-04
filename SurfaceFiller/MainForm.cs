@@ -15,6 +15,7 @@ namespace SurfaceFiller
         private FlowLayoutPanel freeCameraSection;
         private SceneViewer sceneViewer;
         private Scene scene;
+        private FlowLayoutPanel fogSection;
 
         private readonly CameraSample[] cameras =
         {
@@ -69,8 +70,14 @@ namespace SurfaceFiller
             this.toolbar.AddDivider();
             this.toolbar.AddOption(ShowLinesHandler, Labels.ShowLinesOption, Hints.ShowLines, false);
             this.toolbar.AddOption(FillObjectsHandler, Labels.FillObjectsOption, Hints.FillObjects, true);
-            this.toolbar.AddOption(FogHandler, Labels.Fog);
             this.toolbar.AddOption(VibrationsHandler, Labels.Vibrations);
+            this.toolbar.AddDivider();
+            this.toolbar.AddOption(FogHandler, Labels.Fog);
+            this.fogSection = this.toolbar.StartSection();
+            this.toolbar.AddSlider(FogDistanceHandler, Labels.FogDistance, 0.5f);
+            this.toolbar.AddSlider(FogIntensityHandler, Labels.FogIntensity, 0.5f);
+            this.toolbar.EndSection();
+            this.toolbar.AddDivider();
             this.toolbar.AddSpacing();
             this.toolbar.StartSection();
             this.toolbar.AddRadioOption(DayRadioHandler, Labels.Day, null, true);
@@ -99,6 +106,18 @@ namespace SurfaceFiller
             this.toolbar.AddSlider(MParameterHandler, Labels.MParameter, Defaults.MParameter);
             this.toolbar.AddDivider();
             this.toolbar.EndSection();
+
+            this.fogSection.Visible = false;
+        }
+
+        private void FogIntensityHandler(float value)
+        {
+            this.sceneViewer.FogIntensity = value;
+        }
+
+        private void FogDistanceHandler(float value)
+        {
+            this.sceneViewer.FogDistance = SceneConstants.MinimumViewDistance + value * (SceneConstants.MaximumViewDistance - SceneConstants.MinimumViewDistance);
         }
 
         private void InitializeForm()
@@ -134,6 +153,7 @@ namespace SurfaceFiller
         private void FogHandler(bool value)
         {
             this.sceneViewer.Fog = value;
+            this.fogSection.Visible = value;
         }
 
         private void ShaderChangedHandler(ShaderSample shaderSample)

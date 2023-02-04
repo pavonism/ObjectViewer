@@ -58,14 +58,16 @@ namespace SketcherControl.Filling
         Vector3 cameraVector;
         float fogDEnd = 10;
         float fogDStart = 0;
+        float intensity;
 
-        public PixelPainterWithFog(DirectBitmap bitmap, Shader colorPicker, Vector3 cameraVector, Vector4 backgroundColor, float viewDistance)
+        public PixelPainterWithFog(DirectBitmap bitmap, Shader colorPicker, Vector3 cameraVector, Vector4 backgroundColor, float viewDistance, float fogIntensity)
         {
             this.bitmap = bitmap;
             this.colorPicker = colorPicker;
             this.cameraVector = cameraVector;
             this.backgroundColor = backgroundColor;
             this.fogDEnd = viewDistance;
+            this.intensity = fogIntensity;
         }
 
         public void StartProcessing(Polygon polygon)
@@ -105,7 +107,7 @@ namespace SketcherControl.Filling
 
         private float CalculateDistanceCoefficient(float d)
         {
-            return (fogDEnd - d) / (fogDEnd - fogDStart);
+            return (fogDEnd - d) / (fogDEnd - fogDStart) * (1 - this.intensity);
         }
     }
 

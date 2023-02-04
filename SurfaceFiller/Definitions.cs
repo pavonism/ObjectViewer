@@ -75,6 +75,8 @@ namespace SurfaceFiller
         public const string Day = "Dzień";
         public const string Night = "Noc";
         public const string Vibrations = "Drgania";
+        public const string FogDistance = "Odległość";
+        public const string FogIntensity = "Intensywność";
     }
 
     public static class Glyphs

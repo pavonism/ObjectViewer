@@ -20,6 +20,7 @@ namespace SketcherControl.SceneManipulation
         public bool Fog { get; set; }
         public Color Background { get; set; }
         public float ViewDistance { get; set; }
+        public float FogIntensity { get; set; }
     }
 
 }
