@@ -1,8 +1,4 @@
-﻿
-using Microsoft.VisualBasic.Devices;
-using System.Diagnostics.CodeAnalysis;
-using System.Windows.Forms;
-using ToolbarControls;
+﻿using ToolbarControls;
 
 namespace SurfaceFiller.Components
 {

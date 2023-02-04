@@ -1,5 +1,4 @@
 ﻿using SurfaceFiller.Components;
-using System.Collections;
 
 namespace SurfaceFiller.Samples
 {

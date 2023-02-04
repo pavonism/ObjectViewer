@@ -1,6 +1,4 @@
 ﻿
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
-
 namespace SurfaceFiller.Components
 {
     public interface IComboItem

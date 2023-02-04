@@ -1,5 +1,4 @@
-﻿using SketcherControl.Geometrics;
-using SketcherControl.SceneManipulation;
+﻿using SketcherControl.SceneManipulation;
 using System.Numerics;
 using Timer = System.Windows.Forms.Timer;
 
