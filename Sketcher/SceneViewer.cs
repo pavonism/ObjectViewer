@@ -121,6 +121,70 @@ namespace SketcherControl
         {
             RefreshView();
         }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+
+            Camera.CameraScreenChanged(Width, Height);
+            UpdateMatrices();
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+        }
+
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            base.OnMouseClick(e);
+            Focus();
+        }
+
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
+        {
+            if (e.Modifiers == Keys.Shift)
+                Scene.MovingObject.Move(0, 0, -0.05f);
+
+            switch (e.KeyCode)
+            {
+                case Keys.W:
+                    Scene.MovingObject.Move(0, 0.05f, 0);
+                    break;
+                case Keys.S:
+                    Scene.MovingObject.Move(0, -0.05f, 0);
+                    break;
+                case Keys.D:
+                    Scene.MovingObject.Move(0.05f, 0, 0);
+                    break;
+                case Keys.A:
+                    Scene.MovingObject.Move(-0.05f, 0, 0);
+                    break;
+                case Keys.Space:
+                    Scene.MovingObject.Move(0, 0, 0.05f);
+                    break;
+                case Keys.Up:
+                    Scene.MovingObject.RotateX(-(float)Math.PI / 20);
+                    break;
+                case Keys.Down:
+                    Scene.MovingObject.RotateX((float)Math.PI / 20);
+                    break;
+                case Keys.Left:
+                    Scene.MovingObject.RotateZ((float)Math.PI / 20);
+                    break;
+                case Keys.Right:
+                    Scene.MovingObject.RotateZ(-(float)Math.PI / 20);
+                    break;
+                case Keys.K:
+                    Scene.Reflector.TurnLeft();
+                    break;
+                case Keys.L:
+                    Scene.Reflector.TurnRight();
+                    break;
+            }
+
+            base.OnPreviewKeyDown(e);
+        }
         #endregion Event Handlers
 
         #region Rendering
@@ -154,14 +218,6 @@ namespace SketcherControl
             this.renderer.Render(Scene, renderParameters);
         }
 
-        protected override void OnSizeChanged(EventArgs e)
-        {
-            base.OnSizeChanged(e);
-
-            Camera.CameraScreenChanged(Width, Height);
-            UpdateMatrices();
-        }
-
         private void UpdateMatrices()
         {
             this.View = Matrix4x4.CreateLookAt(CameraVector, new Vector3(0, 0, 0), new Vector3(0, 0, 1));
@@ -184,62 +240,6 @@ namespace SketcherControl
         {
             this.cameraVector.X += x * speed;
             this.cameraVector.Y += y * speed;
-        }
-
-        protected override void OnGotFocus(EventArgs e)
-        {
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            base.OnMouseClick(e);
-            Focus();
-        }
-
-        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
-        {
-            if(e.Modifiers == Keys.Shift)
-                Scene.MovingObject.Move(0, 0, -0.05f);
-
-            switch (e.KeyCode)
-            {
-                case Keys.W:
-                    Scene.MovingObject.Move(0, 0.05f, 0);
-                    break;
-                case Keys.S:
-                    Scene.MovingObject.Move(0, -0.05f, 0);
-                    break;
-                case Keys.D:
-                    Scene.MovingObject.Move(0.05f, 0,  0);
-                    break;
-                case Keys.A:
-                    Scene.MovingObject.Move(-0.05f, 0, 0);
-                    break;
-                case Keys.Space:
-                    Scene.MovingObject.Move(0, 0, 0.05f);
-                    break;
-                case Keys.Up:
-                    Scene.MovingObject.RotateX((float)Math.PI / 20);
-                    break;
-                case Keys.Down:
-                    Scene.MovingObject.RotateX(-(float)Math.PI / 20);
-                    break;
-                case Keys.Left:
-                    Scene.MovingObject.RotateZ((float)Math.PI / 20);
-                    break;
-                case Keys.Right:
-                    Scene.MovingObject.RotateZ(-(float)Math.PI / 20);
-                    break;
-                case Keys.K:
-                    Scene.Reflector.TurnLeft();
-                    break;
-                case Keys.L:
-                    Scene.Reflector.TurnRight();
-                    break;
-            }
-
-            base.OnPreviewKeyDown(e);
         }
         #endregion
     }

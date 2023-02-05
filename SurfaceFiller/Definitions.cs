@@ -18,11 +18,10 @@ namespace SurfaceFiller
     {
         public const string ProgramTitle = "ObjectViewer  \u25B2";
 
-        public const string TextureAssets = @"..\..\..\..\Assets\Textures";
-        public const string NormalMapsAssets = @"..\..\..\..\Assets\NormalMaps";
         public const string ObjectAssets = @"..\..\..\..\Assets\Objects";
         public const string TorusFile = @"..\..\..\..\Assets\Objects\FullDonut.obj";
         public const string SphereFile = @"..\..\..\..\Assets\Objects\Sphere.obj";
+        public const string FullSphereFile = @"..\..\..\..\Assets\Objects\FullSphere.obj";
 
         public static Color ThemeColor = Color.FromArgb(255, 0, 120, 215);
     }

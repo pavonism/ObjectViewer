@@ -31,16 +31,28 @@ namespace SketcherControl.SceneManipulation
         }
         #endregion Fields and Properties
 
+        #region Initialization
         public Scene()
         {
             objects = new();
             lightSources = new();
         }
-
+        #endregion
 
         #region Events
         public event Action<Scene>? SceneChanged;
 
+        private void SendSceneChanged()
+        {
+            SceneChanged?.Invoke(this);
+        }
+        private void ParametersChangedHandler()
+        {
+            SendSceneChanged();
+        }
+        #endregion Events
+
+        #region Public methods
         public void AddObject(Object3 obj)
         {
             this.objects.Add(obj);
@@ -54,19 +66,10 @@ namespace SketcherControl.SceneManipulation
             SendSceneChanged();
         }
 
-        private void SendSceneChanged()
-        {
-            SceneChanged?.Invoke(this);
-        }
-        private void ParametersChangedHandler()
-        {
-            SendSceneChanged();
-        }
-        #endregion Events
-
         public void Clear()
         {
             objects.Clear();
         }
+        #endregion Public methods
     }
 }

@@ -7,13 +7,14 @@ namespace SketcherControl.Filling
     public abstract class Shader : IShader
     {
         #region Fields and Events
-        public event Action? ParametersChanged;
-        public Vector4 Observer { get; set; } = new(0, 0, 1, 0);
-
         private List<Light> lights = new();
-        public ShaderParameters Parameters { get; set; } = new();
         protected Object3 target;
+
+        public Vector4 Observer { get; set; } = new(0, 0, 1, 0);
+        public ShaderParameters Parameters { get; set; } = new();
         public float Night { get; set; }
+
+        public event Action? ParametersChanged;
         #endregion
 
         #region Initialization

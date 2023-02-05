@@ -45,11 +45,6 @@ namespace SketcherControl.Shapes
             this.triangles = triangles;
             ObjectSize = objectSize;
             this.objectIndx = objectIndx;
-
-            if (this.objectIndx % 2 == 0)
-                this.Color = SketcherConstants.ThemeColor;
-            else
-                this.Color = Color.MediumPurple;
         }
 
         public Object3()
@@ -119,6 +114,7 @@ namespace SketcherControl.Shapes
                 this.Rotation *= Animation.GetRotation();
                 this.Translation *= Animation.GetTranslation();
                 UpdateModel();
+                ObjectMoved?.Invoke(Translation, Rotation);
             }
 
             foreach (var triangle in this.triangles)
