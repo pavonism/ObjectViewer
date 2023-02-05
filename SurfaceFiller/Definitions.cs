@@ -91,17 +91,7 @@ namespace SurfaceFiller
 
     public static class Hints
     {
-        public const string OpenOBJ = "Załaduj powierzchnię z pliku *.obj";
-        public const string Fill = "Włącz / wyłącz wypełenienie powierzchni";
         public const string FillObjects = "Włącz / wyłącz wypełnianie obiektów";
         public const string ShowLines = "Pokaż linie triangulacji";
-        public const string ColorInterpolation = "Włącz tryb interpolacji kolorów";
-        public const string VectorInterpolation = "Włącz tryb interpolacji wektorów normalnych";
-        public const string ChangeLightColor = "Zmień kolor źródła światła";
-        public const string ShowTrack = "Pokaż / ukryj trajektorię poruszania się światła";
-        public const string ResetPosition = "Resetuj położenie źródła światła do punktu początkowego";
-        public const string ChangeObjectColor = "Zmień kolor powierzchni";
-        public const string LoadObjectPattern = "Wczytaj z pliku teksturę powierzchni";
-        public const string LoadNormalMap = "Wczytaj z pliku mapę wektorów normalnych";
     }
 }

@@ -1,7 +1,6 @@
 ﻿using SketcherControl;
 using SketcherControl.Filling;
 using SketcherControl.SceneManipulation;
-using SketcherControl.Shapes;
 using SurfaceFiller;
 using System.Numerics;
 
