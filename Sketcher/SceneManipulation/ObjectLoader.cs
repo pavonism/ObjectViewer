@@ -7,6 +7,11 @@ namespace SketcherControl.SceneManipulation
     {
         private int idCounter = 0;
 
+        public ObjectLoader()
+        {
+            Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        }
+
         public Object3 MakeCopy(Object3 obj) 
         {
             List<Triangle> triangles = new List<Triangle>();
